@@ -19,6 +19,7 @@
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/saira": "^5.3.0",
     "@fontsource/saira-condensed": "^5.3.0",
+    "@keystar/ui": "^0.10.0",
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.9",
     "astro": "^7.3.8",

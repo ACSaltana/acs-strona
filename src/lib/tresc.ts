@@ -148,7 +148,8 @@ async function naTurniej(wpis: CollectionEntry<'turnieje'>): Promise<Turniej> {
   const d = wpis.data;
   const [wszystkieDruzyny, wszyscySponsorzy] = await Promise.all([pobierzDruzyny(), pobierzSponsorow()]);
   const druzyny = d.druzyny.map((slug) => wszystkieDruzyny.get(slug)).filter(istnieje);
-  const drabinka = zbudujDrabinke(d.limitDruzyn, d.mecze, wszystkieDruzyny);
+  // wielkość drabinki ustawia się w edytorze; starsze wpisy bez niej liczą ją z limitu drużyn
+  const drabinka = zbudujDrabinke(d.mecze.rozmiar ?? d.limitDruzyn, d.mecze.lista, wszystkieDruzyny);
   const miniatura = obraz(d.miniatura);
   const sponsorzy = d.sponsorzy.map((slug) => wszyscySponsorzy.get(slug)).filter(istnieje);
   const start = d.start!;

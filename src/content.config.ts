@@ -4,6 +4,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { odczytajDrabinke } from './lib/drabinka';
 
 /** Tekst opcjonalny: pusty napis i null traktujemy jak brak. */
 const tekst = z
@@ -23,20 +24,7 @@ const dzien = z
   .nullish()
   .transform((v) => (v === null || v === undefined || v === '' ? undefined : (v instanceof Date ? v.toISOString() : v).slice(0, 10)));
 
-const liczba = z.number().nullish().transform((v) => v ?? undefined);
 const lista = z.array(z.string()).nullish().transform((v) => v ?? []);
-
-const mecz = z.object({
-  runda: z.enum(['1-8', 'cwiercfinal', 'polfinal', 'final']),
-  pozycja: z.number().int().min(1),
-  termin: dataCzas,
-  druzynaA: tekst,
-  druzynaB: tekst,
-  wynikA: liczba,
-  wynikB: liczba,
-  zwyciezca: z.enum(['brak', 'a', 'b']).default('brak'),
-  naZywo: z.boolean().default(false),
-});
 
 const turnieje = defineCollection({
   loader: glob({ pattern: '*.mdoc', base: './src/content/turnieje' }),
@@ -57,7 +45,8 @@ const turnieje = defineCollection({
     lead: tekst,
     druzyny: lista,
     zwyciezca: tekst,
-    mecze: z.array(mecz).nullish().transform((v) => v ?? []),
+    // drabinkę zapisuje edytor w panelu (src/panel/drabinka.tsx); ten sam kod ją tu odczytuje
+    mecze: z.unknown().transform((v) => odczytajDrabinke(v)),
     sponsorzy: lista,
     regulaminPdf: tekst,
   }),

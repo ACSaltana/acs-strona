@@ -3,18 +3,12 @@
 import { createElement } from 'react';
 import { collection, config, fields, singleton } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
+import { poleDrabinki } from './src/panel/drabinka';
 
 // Projekt Keystatic Cloud ("zespol/projekt"): na produkcji panel loguje przez Keystatic Cloud
 // i zapisuje zmiany commitami do repozytorium. Lokalnie (npm run dev) zapisuje pliki na dysku, bez logowania.
 const cloudProject = 'acsaltana/acs-strona';
 const useCloud = !import.meta.env.DEV;
-
-const RUNDY = [
-  { label: '1/8 finału', value: '1-8' },
-  { label: 'Ćwierćfinał', value: 'cwiercfinal' },
-  { label: 'Półfinał', value: 'polfinal' },
-  { label: 'Finał', value: 'final' },
-] as const;
 
 const PLATFORMY = ['Discord', 'YouTube', 'Twitch', 'Instagram', 'TikTok', 'X', 'Facebook'] as const;
 
@@ -81,12 +75,18 @@ export default config({
           ],
           defaultValue: 'announced',
         }),
+        mecze: poleDrabinki({
+          label: 'Drabinka',
+          description: 'Wygląda tak jak na stronie. Kliknij mecz, żeby ustawić godzinę, drużyny i wynik. Puste miejsca strona pokaże jako „TBD”, a mecze bez godziny jako „ASAP”.',
+        }),
+        druzyny: fields.multiRelationship({ label: 'Drużyny', description: 'Drużyny przyjęte do turnieju. Najpierw dodaj drużynę w zakładce „Drużyny”.', collection: 'druzyny' }),
+        zwyciezca: fields.relationship({ label: 'Zwycięzca turnieju', description: 'Pokazywany w archiwum. Puste = zwycięzca finału z drabinki.', collection: 'druzyny' }),
         gra: fields.text({ label: 'Gra', defaultValue: 'CS2', validation: { isRequired: true } }),
         format: fields.text({ label: 'Format', description: 'np. „5v5 · BO3”', validation: { isRequired: true } }),
         etykietaDrabinki: fields.text({ label: 'System rozgrywek', description: 'Etykieta przy drabince, np. „Single elimination · BO3”. Może zostać pusta.' }),
         limitDruzyn: fields.integer({
           label: 'Limit drużyn',
-          description: 'Od niego zależy wielkość drabinki (16 drużyn = 1/8 finału, 8 = ćwierćfinały). W trakcie zapisów strona pokazuje „zapisane / limit”.',
+          description: 'Ile drużyn może się zapisać. W trakcie zapisów strona pokazuje „zapisane / limit” i wolne miejsca. Wielkość drabinki ustawia się osobno, w polu „Drabinka”.',
           defaultValue: 16,
           validation: { isRequired: true, min: 2, max: 16 },
         }),
@@ -105,42 +105,6 @@ export default config({
         baner: obraz('turnieje', 'Baner (21:9)', '2520×1080. Najważniejszy motyw po prawej i w środku. Brak = strona użyje miniatury.'),
         opisGrafiki: fields.text({ label: 'Opis grafiki (alt)', description: 'Jedno zdanie dla czytników ekranu, np. „Grafika turnieju ACS Winter Cup #3”.' }),
         lead: fields.text({ label: 'Lead', description: '1–2 zdania pod tytułem.', multiline: true }),
-        druzyny: fields.multiRelationship({ label: 'Drużyny', description: 'Drużyny przyjęte do turnieju. Najpierw dodaj drużynę w zakładce „Drużyny”.', collection: 'druzyny' }),
-        zwyciezca: fields.relationship({ label: 'Zwycięzca turnieju', description: 'Pokazywany w archiwum. Puste = zwycięzca finału z drabinki.', collection: 'druzyny' }),
-        mecze: fields.array(
-          fields.object({
-            runda: fields.select({ label: 'Runda', options: [...RUNDY], defaultValue: '1-8' }),
-            pozycja: fields.integer({ label: 'Pozycja w rundzie', description: '1 = pierwszy mecz od góry drabinki.', defaultValue: 1, validation: { isRequired: true, min: 1, max: 8 } }),
-            termin: fields.datetime({ label: 'Data i godzina', description: 'Czas polski. Puste = „ASAP” (mecz zaraz po rozstrzygnięciu poprzedniego).' }),
-            druzynaA: fields.relationship({ label: 'Drużyna A', description: 'Puste = zwycięzca poprzedniej rundy, a gdy go jeszcze nie ma: „TBD”.', collection: 'druzyny' }),
-            druzynaB: fields.relationship({ label: 'Drużyna B', collection: 'druzyny' }),
-            wynikA: fields.integer({ label: 'Wynik A', description: 'Wygrane mapy.', validation: { min: 0 } }),
-            wynikB: fields.integer({ label: 'Wynik B', validation: { min: 0 } }),
-            zwyciezca: fields.select({
-              label: 'Zwycięzca meczu',
-              description: 'Zwycięzca przechodzi automatycznie do kolejnej rundy.',
-              options: [
-                { label: 'Nierozstrzygnięty', value: 'brak' },
-                { label: 'Drużyna A', value: 'a' },
-                { label: 'Drużyna B', value: 'b' },
-              ],
-              defaultValue: 'brak',
-            }),
-            naZywo: fields.checkbox({ label: 'Mecz na żywo', description: 'Czerwona ramka i „Live” zamiast godziny. Odznacz po zakończeniu meczu.' }),
-          }),
-          {
-            label: 'Mecze (drabinka)',
-            description: 'Dodaj tylko mecze, które mają godzinę, drużyny albo wynik. Pozostałe miejsca drabinki strona pokaże jako „TBD” i „ASAP”.',
-            itemLabel: (props) => {
-              const runda = RUNDY.find((r) => r.value === props.fields.runda.value)?.label ?? 'Mecz';
-              // puste pole drużyny = zwycięzca poprzedniej rundy albo TBD
-              const a = props.fields.druzynaA.value ?? 'auto';
-              const b = props.fields.druzynaB.value ?? 'auto';
-              const live = props.fields.naZywo.value ? ' · na żywo' : '';
-              return `${runda} ${props.fields.pozycja.value ?? ''}: ${a} – ${b}${live}`;
-            },
-          },
-        ),
         sponsorzy: fields.multiRelationship({ label: 'Sponsorzy', description: 'Najpierw dodaj sponsora w zakładce „Sponsorzy”.', collection: 'sponsorzy' }),
         regulaminPdf: fields.file({ label: 'Pełny regulamin (PDF)', description: 'Z plikiem pod zasadami pojawia się przycisk „Pełny regulamin (PDF)”.', directory: 'public/regulaminy', publicPath: '/regulaminy/' }),
         zasady: fields.markdoc({

@@ -23,18 +23,117 @@ export interface DruzynaDrabinki {
   logo?: Grafika;
 }
 
-const RUNDY: { id: RundaId; mecze: number; nazwa: string }[] = [
-  { id: '1-8', mecze: 8, nazwa: '1/8 finału' },
-  { id: 'cwiercfinal', mecze: 4, nazwa: 'Ćwierćfinały' },
-  { id: 'polfinal', mecze: 2, nazwa: 'Półfinały' },
-  { id: 'final', mecze: 1, nazwa: 'Finał' },
+export interface Runda {
+  id: RundaId;
+  /** Liczba meczów w rundzie */
+  mecze: number;
+  /** Nazwa kolumny drabinki, np. „Ćwierćfinały” */
+  nazwa: string;
+  /** Nazwa pojedynczego meczu, np. „Ćwierćfinał” */
+  nazwaMeczu: string;
+}
+
+const RUNDY: Runda[] = [
+  { id: '1-8', mecze: 8, nazwa: '1/8 finału', nazwaMeczu: '1/8 finału' },
+  { id: 'cwiercfinal', mecze: 4, nazwa: 'Ćwierćfinały', nazwaMeczu: 'Ćwierćfinał' },
+  { id: 'polfinal', mecze: 2, nazwa: 'Półfinały', nazwaMeczu: 'Półfinał' },
+  { id: 'final', mecze: 1, nazwa: 'Finał', nazwaMeczu: 'Finał' },
 ];
 
-/** Liczba meczów pierwszej rundy dla danego limitu drużyn: 16 → 8, 9–15 → 8 (wolne losy), 8 → 4, 4 → 2, 2 → 1. */
+/** Liczba meczów pierwszej rundy dla danej liczby drużyn: 16 → 8, 9–15 → 8 (wolne losy), 8 → 4, 4 → 2, 2 → 1. */
 function meczePierwszejRundy(limit: number): number {
   let mecze = 1;
   while (mecze * 2 < limit && mecze < 8) mecze *= 2;
   return mecze;
+}
+
+/** Rundy drabinki dla danej liczby drużyn, od pierwszej do finału. */
+export function rundyDrabinki(limit: number): Runda[] {
+  const pierwsza = meczePierwszejRundy(limit);
+  return RUNDY.filter((r) => r.mecze <= pierwsza);
+}
+
+/* ---------- zapis i odczyt drabinki w treści ---------- */
+
+export type RozmiarDrabinki = 2 | 4 | 8 | 16;
+const ROZMIARY: RozmiarDrabinki[] = [2, 4, 8, 16];
+
+export interface ZapisanaDrabinka {
+  /** Liczba drużyn w drabince. Brak (starsze wpisy) = strona liczy ją z limitu drużyn. */
+  rozmiar?: RozmiarDrabinki;
+  lista: Mecz[];
+}
+
+const tekst = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
+const liczba = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
+
+function naMecz(surowy: unknown): Mecz | undefined {
+  if (!surowy || typeof surowy !== 'object') return undefined;
+  const s = surowy as Record<string, unknown>;
+  const runda = RUNDY.find((r) => r.id === s.runda)?.id;
+  const pozycja = Number(s.pozycja);
+  if (!runda || !Number.isInteger(pozycja) || pozycja < 1) return undefined;
+  // Keystatic zapisuje datę z godziną jako znacznik czasu YAML, w którym zegar UTC = czas polski
+  const termin = s.termin instanceof Date ? s.termin.toISOString().slice(0, 16) : tekst(s.termin)?.slice(0, 16);
+  return {
+    runda,
+    pozycja,
+    termin,
+    druzynaA: tekst(s.druzynaA),
+    druzynaB: tekst(s.druzynaB),
+    wynikA: liczba(s.wynikA),
+    wynikB: liczba(s.wynikB),
+    zwyciezca: s.zwyciezca === 'a' || s.zwyciezca === 'b' ? s.zwyciezca : 'brak',
+    naZywo: s.naZywo === true,
+  };
+}
+
+/**
+ * Drabinka z pliku treści. Przyjmuje obecny zapis ({ rozmiar, lista }) i starszy (sama lista meczów).
+ * Błędne rekordy pomija, żeby zły wpis nie zatrzymał budowania strony.
+ */
+export function odczytajDrabinke(wartosc: unknown): ZapisanaDrabinka {
+  const obiekt = wartosc && typeof wartosc === 'object' && !Array.isArray(wartosc) ? (wartosc as Record<string, unknown>) : undefined;
+  const surowa = Array.isArray(wartosc) ? wartosc : Array.isArray(obiekt?.lista) ? obiekt.lista : [];
+  const lista: Mecz[] = [];
+  for (const mecz of surowa.map(naMecz)) {
+    if (mecz && !lista.some((m) => m.runda === mecz.runda && m.pozycja === mecz.pozycja)) lista.push(mecz);
+  }
+  return { rozmiar: ROZMIARY.find((r) => r === Number(obiekt?.rozmiar)), lista };
+}
+
+/** Rozmiar drabinki, gdy nie jest zapisany: najmniejszy, w którym mieszczą się wpisane mecze, a bez meczów 16. */
+export function rozmiarZListy(lista: Mecz[]): RozmiarDrabinki {
+  if (lista.some((m) => m.runda === '1-8')) return 16;
+  if (lista.some((m) => m.runda === 'cwiercfinal')) return 8;
+  if (lista.some((m) => m.runda === 'polfinal')) return 4;
+  return 16;
+}
+
+const maTresc = (m: Mecz) => Boolean(m.termin || m.druzynaA || m.druzynaB || m.wynikA !== undefined || m.wynikB !== undefined || m.zwyciezca !== 'brak' || m.naZywo);
+
+/**
+ * Drabinka w postaci do zapisu w pliku: tylko mecze mieszczące się w drabince i zawierające jakąś informację,
+ * w kolejności rund i pozycji, bez pustych pól.
+ */
+export function zapiszDrabinke(drabinka: { rozmiar: RozmiarDrabinki; lista: Mecz[] }) {
+  const rundy = rundyDrabinki(drabinka.rozmiar);
+  const kolejnosc = (m: Mecz) => rundy.findIndex((r) => r.id === m.runda) * 100 + m.pozycja;
+  const lista = drabinka.lista
+    .filter((m) => rundy.some((r) => r.id === m.runda && m.pozycja <= r.mecze) && maTresc(m))
+    .sort((a, b) => kolejnosc(a) - kolejnosc(b))
+    .map((m) => ({
+      runda: m.runda,
+      pozycja: m.pozycja,
+      ...(m.termin ? { termin: m.termin } : {}),
+      ...(m.druzynaA ? { druzynaA: m.druzynaA } : {}),
+      ...(m.druzynaB ? { druzynaB: m.druzynaB } : {}),
+      ...(m.wynikA !== undefined ? { wynikA: m.wynikA } : {}),
+      ...(m.wynikB !== undefined ? { wynikB: m.wynikB } : {}),
+      zwyciezca: m.zwyciezca,
+      naZywo: m.naZywo,
+    }));
+  return { rozmiar: drabinka.rozmiar, lista };
 }
 
 export interface Drabinka {
@@ -46,8 +145,7 @@ export interface Drabinka {
 }
 
 export function zbudujDrabinke(limit: number, mecze: Mecz[], druzyny: Map<string, DruzynaDrabinki>): Drabinka {
-  const pierwsza = meczePierwszejRundy(limit);
-  const rundy = RUNDY.filter((r) => r.mecze <= pierwsza);
+  const rundy = rundyDrabinki(limit);
   const rounds: BracketRound[] = [];
   let mistrz: DruzynaDrabinki | undefined;
   let terminFinalu: string | undefined;
