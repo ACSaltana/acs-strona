@@ -4,9 +4,10 @@ import { createElement } from 'react';
 import { collection, config, fields, singleton } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
 
-// Projekt Keystatic Cloud w formacie "zespol/projekt". Lokalnie (npm run dev) panel zapisuje pliki na dysku.
-const cloudProject = import.meta.env.PUBLIC_KEYSTATIC_PROJECT as string | undefined;
-const useCloud = Boolean(cloudProject) && !import.meta.env.DEV;
+// Projekt Keystatic Cloud ("zespol/projekt"): na produkcji panel loguje przez Keystatic Cloud
+// i zapisuje zmiany commitami do repozytorium. Lokalnie (npm run dev) zapisuje pliki na dysku, bez logowania.
+const cloudProject = 'acsaltana/acs-strona';
+const useCloud = !import.meta.env.DEV;
 
 const RUNDY = [
   { label: '1/8 finału', value: '1-8' },
@@ -36,7 +37,7 @@ const formatowanie = {
 
 export default config({
   storage: useCloud ? { kind: 'cloud' } : { kind: 'local' },
-  cloud: cloudProject ? { project: cloudProject } : undefined,
+  cloud: { project: cloudProject },
   locale: 'pl-PL',
   ui: {
     brand: { name: 'ACS' },
