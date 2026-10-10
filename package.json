@@ -9,11 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "podglad": "node scripts/podglad.mjs",
-    "check": "astro check",
-    "test": "node scripts/sprawdz.mjs",
-    "zrzuty": "node scripts/zrzuty.mjs",
-    "seed": "node scripts/seed.mjs"
+    "check": "astro check"
   },
   "dependencies": {
     "@astrojs/markdoc": "^2.0.11",
@@ -32,7 +28,6 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "playwright-core": "^1.64.0",
     "typescript": "^6.0.3"
   }
 }
