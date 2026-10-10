@@ -6,6 +6,7 @@ import { zbudujDrabinke, type Drabinka, type DruzynaDrabinki } from './drabinka'
 import { formatKwota } from './format';
 import { obraz } from './obrazy';
 import type { Grafika, NavItem, Social, TournamentStatus } from './typy';
+import { wybierzAktualny } from './wybor';
 
 export const NAZWA = 'Altana Championship Series';
 export const SKROT = 'ACS';
@@ -210,13 +211,7 @@ export function pobierzTurnieje(): Promise<Turniej[]> {
  * To ten jeden turniej pokazują baner i strona główna.
  */
 export async function aktualnyTurniej(): Promise<Turniej | undefined> {
-  const turnieje = await pobierzTurnieje();
-  const rosnaco = [...turnieje].reverse();
-  const live = rosnaco.find((t) => t.status === 'live');
-  if (live) return live;
-  const kandydaci = rosnaco.filter((t) => t.status !== 'finished');
-  const dzis = dzisiaj();
-  return kandydaci.find((t) => (t.koniec ?? t.start.slice(0, 10)) >= dzis) ?? kandydaci.at(-1);
+  return wybierzAktualny(await pobierzTurnieje(), dzisiaj());
 }
 
 /** Archiwum: turnieje zakończone, od najnowszego. */

@@ -17,14 +17,16 @@ const { items, current, logo, email, class: className } = Astro.props;
 ---
 
 <header class:list={['acs-header', className]}>
-  <a class="acs-wordmark" href="/" aria-label="ACS Altana Championship Series: strona główna">
+  {/* Nazwa dostępna linku wynika z widocznego tekstu, żeby się z nim nie rozjeżdżała; aria-label tylko przy samym logo. */}
+  <a class="acs-wordmark" href="/" aria-label={logo ? 'Altana Championship Series: strona główna' : undefined}>
     {
       logo ? (
         <Img src={logo} alt="" widths={[160, 320]} sizes="160px" priority />
       ) : (
         <>
-          <span class="acs-wordmark__short">ACS</span>
+          <span class="acs-wordmark__short">ACS</span>{' '}
           <span class="acs-wordmark__long">Altana Championship Series</span>
+          <span class="acs-sr">: strona główna</span>
         </>
       )
     }
@@ -43,9 +45,10 @@ const { items, current, logo, email, class: className } = Astro.props;
 {/* Menu mobilne (<1024px): pełnoekranowy panel bg z linkami heading-1. <dialog> daje pułapkę fokusu i zamykanie klawiszem Esc. */}
 <dialog class="acs-menu" id="menu" aria-label="Menu">
   <div class="acs-header">
-    <a class="acs-wordmark" href="/" aria-label="ACS Altana Championship Series: strona główna">
-      <span class="acs-wordmark__short">ACS</span>
+    <a class="acs-wordmark" href="/">
+      <span class="acs-wordmark__short">ACS</span>{' '}
       <span class="acs-wordmark__long">Altana Championship Series</span>
+      <span class="acs-sr">: strona główna</span>
     </a>
     <button type="button" class="acs-btn acs-btn--secondary acs-btn--sm" data-menu-close>Zamknij</button>
   </div>

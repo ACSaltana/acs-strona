@@ -42,7 +42,7 @@ const okruszki = kategoria ? [{ label: 'ACS', href: '/' }, { label: 'Aktualnośc
         </div>
       ) : (
         <div class="p-empty p-mt-12">
-          <p class="lead">W tej kategorii nie ma jeszcze wpisów.</p>
+          <p class="lead">{kategoria ? 'W tej kategorii nie ma jeszcze wpisów.' : 'Nie ma jeszcze wpisów.'}</p>
         </div>
       )
     }

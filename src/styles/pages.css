@@ -171,6 +171,8 @@ html:has(.acs-menu[open]) { overflow: hidden; }
 }
 
 /* ---------- dopasowania komponentów ---------- */
+/* logo sponsora ma atrybuty width i height (brak przeskoku układu), a skaluje się z zachowaniem proporcji */
+.acs-sponsor__logo img { width: auto; height: auto; }
 /* <picture> w banerze nie może zmieniać układu: obraz dalej wypełnia całe tło */
 .acs-hero__bg picture { display: contents; }
 /* pudełko drabinki przewija się w poziomie, więc musi mieć widoczny fokus z klawiatury */

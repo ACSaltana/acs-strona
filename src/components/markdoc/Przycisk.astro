@@ -5,15 +5,16 @@ import { mailto } from '../../lib/format';
 import { pobierzUstawienia } from '../../lib/tresc';
 
 interface Props {
-  tekst: string;
-  cel?: 'email' | 'link';
+  tekst?: string;
+  cel?: string;
   temat?: string;
   adres?: string;
 }
 
 const { tekst, cel = 'email', temat, adres } = Astro.props;
-const href = cel === 'link' ? adres : mailto((await pobierzUstawienia()).email, temat);
-const zewnetrzny = cel === 'link' && /^https?:\/\//.test(adres ?? '');
+const href = cel === 'link' ? adres?.trim() : mailto((await pobierzUstawienia()).email, temat?.trim() || undefined);
+const zewnetrzny = cel === 'link' && /^https?:\/\//.test(href ?? '');
 ---
 
-{href && <p><Button href={href} icon={zewnetrzny ? '↗' : '→'} target={zewnetrzny ? '_blank' : undefined} rel={zewnetrzny ? 'noopener' : undefined}>{tekst}</Button></p>}
+{/* niedokończony blok (bez tekstu albo adresu) nie wyświetla się wcale */}
+{tekst?.trim() && href && <p><Button href={href} icon={zewnetrzny ? '↗' : '→'} target={zewnetrzny ? '_blank' : undefined} rel={zewnetrzny ? 'noopener' : undefined}>{tekst.trim()}</Button></p>}

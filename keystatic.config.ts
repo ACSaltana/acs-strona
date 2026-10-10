@@ -1,5 +1,6 @@
 // Panel administracyjny ACS (Keystatic). Model treści według design-system/cms.md.
 // Treść zapisuje się w src/content, grafiki w src/assets, pliki PDF w public/regulaminy.
+import { createElement } from 'react';
 import { collection, config, fields, singleton } from '@keystatic/core';
 import { block } from '@keystatic/core/content-components';
 
@@ -223,6 +224,15 @@ export default config({
             przycisk: block({
               label: 'Przycisk',
               description: 'Biały przycisk pod akapitem, np. „Napisz zgłoszenie”.',
+              // podgląd bloku w edytorze: od razu widać, czy przycisk jest uzupełniony
+              ContentView: ({ value }) =>
+                createElement(
+                  'span',
+                  null,
+                  value.tekst
+                    ? `„${value.tekst}” → ${value.cel === 'link' ? value.adres || 'brak adresu strony' : 'e-mail do ACS'}`
+                    : 'Pusty przycisk: kliknij „Edit” i wpisz tekst. Bez tekstu nie pojawi się na stronie.',
+                ),
               schema: {
                 tekst: fields.text({ label: 'Tekst przycisku', validation: { isRequired: true } }),
                 cel: fields.select({

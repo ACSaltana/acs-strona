@@ -1,0 +1,15 @@
+---
+// Obrazek wstawiony w treść wpisu. Pliki z repozytorium są optymalizowane, adresy zewnętrzne zostają bez zmian.
+import Img from '../Img.astro';
+import type { Grafika } from '../../lib/typy';
+
+interface Props {
+  src: Grafika;
+  alt?: string;
+  title?: string;
+}
+
+const { src, alt, title } = Astro.props;
+---
+
+<Img src={src} alt={alt ?? ''} title={title} widths={[480, 720, 1080, 1440]} sizes="(max-width: 752px) calc(100vw - 32px), 720px" />

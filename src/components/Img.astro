@@ -11,10 +11,11 @@ interface Props {
   sizes?: string;
   /** Pierwszy ekran: ładuj od razu i z wysokim priorytetem */
   priority?: boolean;
+  title?: string;
   class?: string;
 }
 
-const { src, alt, widths = [480, 800, 1200, 1600], sizes = '100vw', priority = false, class: className } = Astro.props;
+const { src, alt, widths = [480, 800, 1200, 1600], sizes = '100vw', priority = false, title, class: className } = Astro.props;
 const meta = typeof src === 'string' ? undefined : src;
 const raster = meta && meta.format !== 'svg' ? meta : undefined;
 const variants = raster ? [...widths.filter((w) => w < raster.width), raster.width] : [];
@@ -24,8 +25,8 @@ const fetchpriority = priority ? 'high' : undefined;
 
 {
   raster ? (
-    <Image src={raster} alt={alt} widths={variants} sizes={sizes} format="webp" loading={loading} decoding="async" fetchpriority={fetchpriority} class={className} />
+    <Image src={raster} alt={alt} widths={variants} sizes={sizes} format="webp" loading={loading} decoding="async" fetchpriority={fetchpriority} title={title} class={className} />
   ) : (
-    <img src={meta ? meta.src : (src as string)} alt={alt} width={meta?.width} height={meta?.height} loading={loading} decoding="async" fetchpriority={fetchpriority} class={className} />
+    <img src={meta ? meta.src : (src as string)} alt={alt} width={meta?.width} height={meta?.height} loading={loading} decoding="async" fetchpriority={fetchpriority} title={title} class={className} />
   )
 }
