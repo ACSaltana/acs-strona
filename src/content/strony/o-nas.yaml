@@ -1,0 +1,19 @@
+tytul: Altana Championship Series
+lead: ACS organizuje turnieje esportowe w Counter-Strike 2. Zamiast wielu małych wydarzeń stawiamy na jeden duży turniej co kilka miesięcy.
+grafika: /src/assets/strony/grafika.webp
+opisGrafiki: 'Ilustracja: drabinka turniejowa'
+bloki:
+  - tytul: Jeden duży turniej
+    tekst: Co 2–4 miesiące organizujemy jeden turniej Counter-Strike 2 i zapowiadamy go z dużym wyprzedzeniem.
+  - tytul: Jasne zasady
+    tekst: Każdy turniej ma stronę z formatem, drabinką, godzinami meczów, pulą nagród i regulaminem.
+  - tytul: Kontakt bez formularzy
+    tekst: Zgłoszenia i pytania przyjmujemy mailowo. Drużyny dodajemy po weryfikacji.
+liczby:
+  - wartosc: '[00]'
+    etykieta: Rozegrane turnieje
+  - wartosc: '[000]'
+    etykieta: Drużyny w turniejach
+  - wartosc: '[00 000] PLN'
+    etykieta: Łączna pula nagród
+historia: '[Historia ACS: jak powstała organizacja, kto ją prowadzi i jakie ma cele. Dwa, trzy akapity od organizatora.]'

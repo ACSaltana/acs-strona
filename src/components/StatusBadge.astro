@@ -1,0 +1,12 @@
+---
+import { STATUS_LABEL, type TournamentStatus } from '../lib/typy';
+
+interface Props {
+  status: TournamentStatus;
+  class?: string;
+}
+
+const { status = 'announced', class: className } = Astro.props;
+---
+
+<span class:list={['acs-status', `acs-status--${status}`, className]}>{status === 'live' && <span class="acs-status__dot" aria-hidden="true" />}<slot>{STATUS_LABEL[status] ?? status}</slot></span>

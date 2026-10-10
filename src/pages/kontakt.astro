@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import Crumbs from '../components/Crumbs.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import { pobierzTeksty, pobierzUstawienia } from '../lib/tresc';
+
+const [teksty, ustawienia] = await Promise.all([pobierzTeksty(), pobierzUstawienia()]);
+const { kontakt } = teksty;
+const opis = kontakt.lead ?? 'Kontakt z Altana Championship Series: zgłoszenia drużyn, pytania o turnieje i współpraca. Wszystko załatwiamy mailowo.';
+---
+
+<Layout title="Kontakt" description={opis}>
+  <section class="p-wrap p-head">
+    <Crumbs items={[{ label: 'ACS', href: '/' }, { label: 'Kontakt' }]} />
+    <h1 class="display-lg p-title">Kontakt</h1>
+    {kontakt.lead && <p class="lead p-lead">{kontakt.lead}</p>}
+    <div class="p-mt-12">
+      <ContactBlock email={ustawienia.email} topics={kontakt.wskazowka} />
+    </div>
+  </section>
+
+  {
+    kontakt.tematy.length > 0 && (
+      <section class="p-wrap p-section">
+        <SectionHeader index="01" eyebrow="Tematy" title="W czym pomożemy" />
+        <div class="p-cols-3 p-mt-8">
+          {kontakt.tematy.map((temat) => (
+            <div class="p-block">
+              <h3 class="heading-2 p-flush">{temat.tytul}</h3>
+              {temat.temat && (
+                <>
+                  <div class="label p-subtle p-mt-4">Temat wiadomości</div>
+                  <div class="meta p-mt-1">{temat.temat}</div>
+                </>
+              )}
+              {temat.opis && <p class="body-sm p-block__text">{temat.opis}</p>}
+              {temat.linkEtykieta && temat.linkAdres && (
+                <div class="p-mt-4">
+                  <Button href={temat.linkAdres} variant="ghost" icon="→">{temat.linkEtykieta}</Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Layout>

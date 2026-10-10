@@ -1,0 +1,56 @@
+---
+import Img from './Img.astro';
+import { initials, type BracketMatch, type BracketRound, type BracketTeam } from '../lib/typy';
+
+interface Props {
+  rounds: BracketRound[];
+  /** Wysokość slotu meczu w pierwszej rundzie; każda kolejna runda ma dwa razy wyższy */
+  slotHeight?: number;
+  class?: string;
+}
+
+const { rounds = [], slotHeight = 112, class: className } = Astro.props;
+const isDecided = (m: BracketMatch) => Boolean(m.a?.winner || m.b?.winner);
+const teamClass = (t: BracketTeam | undefined, decided: boolean) => ['acs-br__team', t?.winner && 'is-winner', decided && !t?.winner && 'is-loser', !t?.name && 'is-tbd'];
+const score = (t?: BracketTeam) => (t?.score !== undefined && t?.score !== null && t?.score !== '' ? t.score : '–');
+---
+
+<div class:list={['acs-bracket', className]} role="group" aria-label="Drabinka turnieju" tabindex="0">
+  <div class="acs-bracket__inner">
+    {
+      rounds.map((r, ri) => (
+        <div class:list={['acs-br__round', ri === 0 && 'is-first', ri === rounds.length - 1 && 'is-last']}>
+          <div class="acs-br__head">
+            <span class="acs-label p-ink">{r.name}</span>
+            {r.date && <span class="acs-br__date">{r.date}</span>}
+          </div>
+          <div class="acs-br__col">
+            {r.matches.map((m) => (
+              <div class="acs-br__slot" style={`height: ${slotHeight * 2 ** ri}px`}>
+                <div class:list={['acs-br__match', m.live && 'is-live']}>
+                  <div class="acs-br__time">
+                    {m.live ? (
+                      <>
+                        <span class="acs-status__dot" aria-hidden="true" />
+                        <span>Live</span>
+                      </>
+                    ) : (
+                      m.time || 'ASAP'
+                    )}
+                  </div>
+                  {[m.a, m.b].map((t) => (
+                    <div class:list={teamClass(t, isDecided(m))}>
+                      <span class="acs-br__logo" aria-hidden="true">{t?.logo ? <Img src={t.logo} alt="" widths={[48, 96]} sizes="24px" /> : t?.name ? initials(t.name) : ''}</span>
+                      <span class="acs-br__name">{t?.name || 'TBD'}</span>
+                      <span class="acs-br__score">{score(t)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>

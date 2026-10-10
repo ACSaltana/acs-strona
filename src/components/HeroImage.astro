@@ -1,0 +1,59 @@
+---
+// Wewnętrzny: grafika banera turnieju. Baner 21:9 na telefonie jest wysokim kadrem ze środka,
+// więc telefon dostaje osobno przycięty, lżejszy plik zamiast całego banera.
+import { getImage } from 'astro:assets';
+import type { Grafika } from '../lib/typy';
+
+interface Props {
+  src: Grafika;
+  alt: string;
+  /** Baner kompaktowy ma kadr 4:3 na każdej szerokości */
+  compact?: boolean;
+  priority?: boolean;
+}
+
+const { src, alt, compact = false, priority = false } = Astro.props;
+const meta = typeof src === 'string' ? undefined : src;
+const raster = meta && meta.format !== 'svg' ? meta : undefined;
+const loading = priority ? 'eager' : 'lazy';
+const fetchpriority = priority ? 'high' : undefined;
+
+/** Warianty przycięte do proporcji `ratio` (szerokość / wysokość), bez powiększania oryginału. */
+async function cropped(image: NonNullable<typeof raster>, ratio: number, widths: number[]) {
+  const maxWidth = Math.min(image.width, Math.floor(image.height * ratio));
+  const list = [...widths.filter((w) => w < maxWidth), maxWidth];
+  return Promise.all(
+    list.map(async (width) => {
+      const out = await getImage({ src: image, width, height: Math.round(width / ratio), fit: 'cover', format: 'webp' });
+      return { url: out.src, width };
+    }),
+  );
+}
+async function scaled(image: NonNullable<typeof raster>, widths: number[]) {
+  const list = [...widths.filter((w) => w < image.width), image.width];
+  return Promise.all(
+    list.map(async (width) => {
+      const out = await getImage({ src: image, width, format: 'webp' });
+      return { url: out.src, width };
+    }),
+  );
+}
+const srcset = (list: { url: string; width: number }[]) => list.map((v) => `${v.url} ${v.width}w`).join(', ');
+
+const main = raster ? (compact ? await cropped(raster, 4 / 3, [480, 800, 1100]) : await scaled(raster, [1280, 1920, 2520])) : [];
+const phone = raster && !compact ? await cropped(raster, 9 / 16, [360, 480, 640]) : [];
+const fallback = main.at(-1);
+// Pełny baner ma stałą wysokość (do 820px), więc grafika 21:9 jest szeroka na ok. 1900px niezależnie od okna.
+const sizes = compact ? '(max-width: 1023px) 100vw, 540px' : '1920px';
+---
+
+{
+  raster && fallback ? (
+    <picture>
+      {phone.length > 0 && <source media="(max-width: 639px)" type="image/webp" srcset={srcset(phone)} sizes="100vw" />}
+      <img src={fallback.url} srcset={srcset(main)} sizes={sizes} alt={alt} width={raster.width} height={raster.height} loading={loading} decoding="async" fetchpriority={fetchpriority} />
+    </picture>
+  ) : (
+    <img src={meta ? meta.src : (src as string)} alt={alt} width={meta?.width} height={meta?.height} loading={loading} decoding="async" fetchpriority={fetchpriority} />
+  )
+}

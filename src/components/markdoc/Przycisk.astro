@@ -1,0 +1,19 @@
+---
+// Przycisk wstawiany w treść wpisu: e-mail do ACS (adres z Ustawień) albo dowolny adres strony.
+import Button from '../Button.astro';
+import { mailto } from '../../lib/format';
+import { pobierzUstawienia } from '../../lib/tresc';
+
+interface Props {
+  tekst: string;
+  cel?: 'email' | 'link';
+  temat?: string;
+  adres?: string;
+}
+
+const { tekst, cel = 'email', temat, adres } = Astro.props;
+const href = cel === 'link' ? adres : mailto((await pobierzUstawienia()).email, temat);
+const zewnetrzny = cel === 'link' && /^https?:\/\//.test(adres ?? '');
+---
+
+{href && <p><Button href={href} icon={zewnetrzny ? '↗' : '→'} target={zewnetrzny ? '_blank' : undefined} rel={zewnetrzny ? 'noopener' : undefined}>{tekst}</Button></p>}

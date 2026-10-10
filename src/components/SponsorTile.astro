@@ -1,0 +1,28 @@
+---
+import Img from './Img.astro';
+import type { Grafika } from '../lib/typy';
+
+interface Props {
+  name: string;
+  logo?: Grafika;
+  /** „Sponsor główny”, „Partner” */
+  tier?: string;
+  size?: 'md' | 'lg';
+  href?: string;
+  class?: string;
+}
+
+const { name, logo, tier, size = 'md', href, class: className } = Astro.props;
+const Root = href ? 'a' : 'div';
+const external = href ? { target: '_blank', rel: 'noopener sponsored' } : {};
+---
+
+<Root class:list={['acs-sponsor', size === 'lg' && 'acs-sponsor--lg', className]} href={href} {...external}>
+  <div class="acs-sponsor__logo">
+    {logo ? <Img src={logo} alt={`Logo ${name || 'sponsora'}`} widths={[240, 480, 800]} sizes={size === 'lg' ? '(max-width: 639px) 70vw, 460px' : '(max-width: 639px) 35vw, 230px'} /> : <span class="acs-sponsor__ph">Logo sponsora</span>}
+  </div>
+  <div class="acs-sponsor__meta">
+    {tier && <span class="acs-label">{tier}</span>}
+    <span class="acs-sponsor__name">{name}</span>
+  </div>
+</Root>

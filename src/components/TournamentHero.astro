@@ -1,0 +1,80 @@
+---
+import HeroImage from './HeroImage.astro';
+import StatusBadge from './StatusBadge.astro';
+import Tag from './Tag.astro';
+import type { Grafika, TournamentStatus } from '../lib/typy';
+
+interface Props {
+  /** Nazwa edycji bez „ACS”, np. „Winter Cup #3” */
+  title: string;
+  /** Domyślnie „ACS” */
+  brand?: string;
+  prizePool?: string;
+  prizeLabel?: string;
+  format?: string;
+  /** „14–15.11.2026” */
+  date?: string;
+  teams?: string | number;
+  status?: TournamentStatus;
+  game?: string;
+  /** „Najbliższy turniej”, „Trwa teraz” */
+  kicker?: string;
+  /** Baner 21:9 */
+  image?: Grafika;
+  imageAlt?: string;
+  href?: string;
+  /** Domyślnie „Zobacz turniej” */
+  cta?: string;
+  /** Kotwica, do której przewija przycisk w hero */
+  id?: string;
+  /** compact: zajawka 4:3 w hero strony głównej */
+  size?: 'full' | 'compact';
+  /** Baner na pierwszym ekranie: grafika ładowana od razu */
+  priority?: boolean;
+  class?: string;
+}
+
+const { title, brand = 'ACS', prizePool, prizeLabel = 'Pula nagród', format, date, teams, status, game = 'CS2', kicker, image, imageAlt, href, cta = 'Zobacz turniej', id, size = 'full', priority = false, class: className } = Astro.props;
+const compact = size === 'compact';
+const facts = ([
+  [prizeLabel, prizePool, 'acs-fact--prize'],
+  ['Format', format],
+  ['Data', date],
+  ['Drużyny', teams],
+] as [string, string | number | undefined, string?][]).filter((f) => f[1] !== undefined && f[1] !== null && f[1] !== '');
+const Root = href ? 'a' : 'section';
+---
+
+<Root id={id} class:list={['acs-hero', compact && 'acs-hero--compact', 'acs-bracketed', className]} href={href}>
+  <div class="acs-hero__bg">
+    {
+      image ? (
+        <HeroImage src={image} alt={imageAlt ?? ''} compact={compact} priority={priority} />
+      ) : (
+        <div class="acs-hero__ph" role="img" aria-label={imageAlt || 'Miejsce na baner turnieju'}>
+          <span class="acs-media__spec">21:9 · 2520×1080</span>
+        </div>
+      )
+    }
+  </div>
+  <div class="acs-hero__top">
+    {status && <StatusBadge status={status} />}
+    <Tag>{game}</Tag>
+    {kicker && <span class="acs-label acs-hero__kicker">{kicker}</span>}
+  </div>
+  <div class="acs-hero__name">
+    <span class="acs-hero__brand">{brand}</span>
+    {title && <span class="acs-hero__title">{title}</span>}
+  </div>
+  <div class="acs-hero__bottom">
+    <dl class="acs-hero__facts">
+      {facts.map((f) => (
+        <div class:list={['acs-fact', f[2]]}>
+          <dt>{f[0]}</dt>
+          <dd>{f[1]}</dd>
+        </div>
+      ))}
+    </dl>
+    {href && !compact && <span class="acs-hero__go" aria-hidden="true">{cta}<span class="acs-hero__arrow">→</span></span>}
+  </div>
+</Root>

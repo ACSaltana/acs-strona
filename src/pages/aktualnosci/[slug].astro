@@ -1,0 +1,65 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Button from '../../components/Button.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import Img from '../../components/Img.astro';
+import Tag from '../../components/Tag.astro';
+import TournamentCta from '../../components/TournamentCta.astro';
+import { adresListy } from '../../lib/aktualnosci';
+import { NAZWA, aktualnyTurniej, grafikaOg, pobierzWpisy, type Wpis } from '../../lib/tresc';
+
+export async function getStaticPaths() {
+  return (await pobierzWpisy()).map((wpis) => ({ params: { slug: wpis.slug }, props: { wpis } }));
+}
+
+interface Props {
+  wpis: Wpis;
+}
+
+const { wpis } = Astro.props;
+const { Content } = await render(wpis.wpis);
+const turniej = await aktualnyTurniej();
+const opis = wpis.zajawka ?? `${wpis.kategoria.nazwa} Altana Championship Series z ${wpis.dataTekst}.`;
+const obrazOg = await grafikaOg(wpis.okladka);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: wpis.tytul,
+  description: opis,
+  datePublished: wpis.data,
+  url: new URL(wpis.href, Astro.site).href,
+  ...(obrazOg ? { image: [new URL(obrazOg, Astro.site).href] } : {}),
+  author: { '@type': 'Organization', name: NAZWA },
+  publisher: { '@type': 'Organization', name: NAZWA },
+};
+---
+
+<Layout title={wpis.tytul} description={opis} image={obrazOg} type="article" jsonLd={jsonLd}>
+  <article class="p-wrap p-top">
+    <Crumbs items={[{ label: 'Aktualności', href: '/aktualnosci' }, { label: wpis.kategoria.nazwa, href: adresListy(wpis.kategoria) }]} />
+    <div class="p-post-head">
+      <div class="p-row p-mt-8">
+        <Tag>{wpis.kategoria.nazwa}</Tag>
+        <time class="label p-subtle" datetime={wpis.data}>{wpis.dataTekst}</time>
+      </div>
+      <h1 class="display-lg p-title">{wpis.tytul}</h1>
+      {wpis.zajawka && <p class="lead p-lead p-lead--post">{wpis.zajawka}</p>}
+    </div>
+    {wpis.okladka && <Img src={wpis.okladka} alt={wpis.opisOkladki} widths={[640, 960, 1280, 1600]} sizes="(max-width: 1136px) calc(100vw - 32px), 1040px" priority class="p-cover" />}
+    <div class="p-article body p-mt-12">
+      <Content />
+    </div>
+    <div class="p-article p-mt-12">
+      <Button href="/aktualnosci" variant="ghost" icon="←" class="p-pager__prev">Wróć do aktualności</Button>
+    </div>
+  </article>
+
+  {
+    turniej && (
+      <section class="p-wrap p-section">
+        <TournamentCta turniej={turniej} />
+      </section>
+    )
+  }
+</Layout>

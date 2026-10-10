@@ -1,0 +1,19 @@
+# build
+dist/
+.astro/
+.vercel/
+
+# zależności
+node_modules/
+
+# środowisko
+.env
+.env.*
+!.env.example
+
+# system i edytor
+.DS_Store
+*.log
+
+# testy wizualne
+/test-results/

@@ -1,0 +1,13 @@
+---
+// Nagłówek w treści z CMS. h1 należy do tytułu strony, więc treść zaczyna od h2.
+interface Props {
+  level: number;
+  id?: string;
+}
+
+const { level, id } = Astro.props;
+const poziom = Math.min(Math.max(level, 2), 4);
+const Tag = `h${poziom}` as 'h2' | 'h3' | 'h4';
+---
+
+<Tag id={id} class={poziom === 2 ? 'heading-2' : 'body-strong'}><slot /></Tag>

@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Crumbs from '../components/Crumbs.astro';
+import Img from '../components/Img.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import TournamentCta from '../components/TournamentCta.astro';
+import { aktualnyTurniej, grafikaOg, pobierzONas } from '../lib/tresc';
+
+const [strona, turniej] = await Promise.all([pobierzONas(), aktualnyTurniej()]);
+const opis = strona.lead ?? 'Altana Championship Series organizuje turnieje esportowe w Counter-Strike 2.';
+
+// numery sekcji liczone po kolei, bo sekcje bez treści znikają
+let numer = 0;
+const kolejny = () => String(++numer).padStart(2, '0');
+---
+
+<Layout title="O nas" description={opis} image={await grafikaOg(strona.grafika)}>
+  <section class="p-wrap">
+    <div class="p-hero">
+      <div>
+        <Crumbs items={[{ label: 'ACS', href: '/' }, { label: 'O nas' }]} />
+        <h1 class="display-lg p-title">{strona.tytul}</h1>
+        {strona.lead && <p class="lead p-lead p-lead--about">{strona.lead}</p>}
+      </div>
+      {strona.grafika && <Img src={strona.grafika} alt={strona.opisGrafiki} widths={[480, 800, 1200]} sizes="(max-width: 1023px) calc(100vw - 32px), 540px" priority class="p-figure" />}
+    </div>
+  </section>
+
+  {
+    strona.bloki.length > 0 && (
+      <section class="p-wrap">
+        <SectionHeader index={kolejny()} eyebrow="Czym się zajmujemy" title="Co robimy" />
+        <div class="p-cols-3 p-mt-8">
+          {strona.bloki.map((blok, i) => (
+            <div class="p-block">
+              <div class="label p-accent">{String(i + 1).padStart(2, '0')}</div>
+              <h3 class="heading-2 p-block__title">{blok.tytul}</h3>
+              {blok.tekst && <p class="body-sm p-block__text">{blok.tekst}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    strona.liczby.length > 0 && (
+      <section class="p-wrap p-section">
+        <SectionHeader index={kolejny()} eyebrow="Liczby" title="ACS w liczbach" />
+        <dl class="p-cols-3 p-stats">
+          {strona.liczby.map((liczba) => (
+            <div class="p-block p-stat">
+              <dt class="label p-subtle">{liczba.etykieta}</dt>
+              <dd class="stat">{liczba.wartosc}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )
+  }
+
+  {
+    strona.historia.length > 0 && (
+      <section class="p-wrap p-section">
+        <SectionHeader index={kolejny()} eyebrow="Historia" title="Kim jesteśmy" />
+        {strona.historia.map((akapit) => (
+          <p class="lead p-lead p-lead--history">{akapit}</p>
+        ))}
+      </section>
+    )
+  }
+
+  {
+    turniej && (
+      <section class="p-wrap p-section">
+        <TournamentCta turniej={turniej} title="Masz drużynę?" text="Sprawdź najbliższy turniej ACS." />
+      </section>
+    )
+  }
+</Layout>

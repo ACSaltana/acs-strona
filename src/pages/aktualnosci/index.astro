@@ -1,0 +1,8 @@
+---
+import ListaWpisow from '../../components/strony/ListaWpisow.astro';
+import { stronyListy } from '../../lib/aktualnosci';
+
+const [pierwsza] = await stronyListy();
+---
+
+<ListaWpisow {...pierwsza!} />

@@ -1,0 +1,41 @@
+---
+import Button from './Button.astro';
+
+interface Props {
+  email: string;
+  topics?: string;
+  eyebrow?: string;
+  class?: string;
+}
+
+const { email, topics, eyebrow = 'Napisz do nas', class: className } = Astro.props;
+---
+
+<section class:list={['acs-contact', className]}>
+  <div class="acs-label">{eyebrow}</div>
+  <div><a class="acs-contact__email" href={`mailto:${email}`}>{email}</a></div>
+  <div class="acs-contact__row">
+    <Button variant="secondary" size="sm" aria-live="polite" data-copy={email}>Kopiuj adres</Button>
+    {topics && <p class="acs-contact__topics">{topics}</p>}
+  </div>
+</section>
+
+<script>
+  // „Kopiuj adres”: kopiuje e-mail do schowka i na 1.8 s zmienia etykietę na „Skopiowano”.
+  document.querySelectorAll<HTMLButtonElement>('button[data-copy]').forEach((button) => {
+    const text = button.querySelector('.acs-btn__text');
+    if (!text) return;
+    const label = text.textContent;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? '');
+        text.textContent = 'Skopiowano';
+        clearTimeout(timer);
+        timer = setTimeout(() => (text.textContent = label), 1800);
+      } catch {
+        // schowek niedostępny: link mailto obok nadal działa
+      }
+    });
+  });
+</script>

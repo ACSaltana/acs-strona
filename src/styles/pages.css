@@ -1,0 +1,177 @@
+/* Układ stron ACS. Przeniesiony z mockups/css/pages.css: style, które makiety miały wpisane inline,
+   są tu klasami. Kolory, odstępy i typografia pochodzą z tokens.css. */
+
+:root {
+  /* Szerokości kolumn tekstu. Nie ma ich w tokens.json, więc są zebrane w tym jednym miejscu. */
+  --measure-hero: 560px;
+  --measure-about: 600px;
+  --measure-lead: 640px;
+  --measure-text: 720px;
+  --measure-wide: 820px;
+  --measure-heading: 960px;
+  --measure-cover: 1040px;
+  /* 40px: odstęp przycisków w hero, między space-8 a space-12 */
+  --space-10: calc(var(--space-8) + var(--space-2));
+}
+
+html, body { background: var(--bg); }
+a { color: var(--link); }
+
+.display-xl, .display-lg, .heading-1, .heading-2, .button, .label { text-transform: uppercase; }
+.stat { font-variant-numeric: tabular-nums; }
+
+/* ---------- szkielet ---------- */
+.p-root { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
+.p-main { flex: 1 0 auto; padding-bottom: var(--space-24); }
+.p-wrap { box-sizing: border-box; width: 100%; max-width: calc(var(--container-max) + var(--space-12) * 2); margin: 0 auto; padding-left: var(--space-12); padding-right: var(--space-12); }
+.p-section { margin-top: var(--space-24); }
+.p-head { padding-top: var(--space-16); }
+.p-top { padding-top: var(--space-12); }
+.p-anchor { scroll-margin-top: var(--space-6); }
+.p-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.p-hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-12); align-items: center; padding: var(--space-24) 0; }
+.p-cols-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); }
+.p-cols-3--posts { row-gap: var(--space-12); }
+.p-teams { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+.p-rows { border-top: 1px solid var(--line); }
+.p-block { border-top: 1px solid var(--line); padding-top: var(--space-6); }
+.p-block__title { margin: var(--space-3) 0 0; }
+.p-block__text { margin: var(--space-3) 0 0; color: var(--ink-muted); }
+/* liczba nad etykietą, choć w kodzie etykieta (dt) stoi przed wartością (dd) */
+.p-stats { margin: var(--space-8) 0 0; }
+.p-stat { display: flex; flex-direction: column-reverse; gap: var(--space-2); }
+.p-stat dd { margin: 0; }
+
+/* odstępy od góry */
+.p-mt-1 { margin-top: var(--space-1); }
+.p-mt-2 { margin-top: var(--space-2); }
+.p-mt-3 { margin-top: var(--space-3); }
+.p-mt-4 { margin-top: var(--space-4); }
+.p-mt-6 { margin-top: var(--space-6); }
+.p-mt-8 { margin-top: var(--space-8); }
+.p-mt-10 { margin-top: var(--space-10); }
+.p-mt-12 { margin-top: var(--space-12); }
+
+/* kolory tekstu */
+.p-ink { color: var(--ink); }
+.p-muted { color: var(--ink-muted); }
+.p-subtle { color: var(--ink-subtle); }
+.p-accent { color: var(--accent); }
+
+/* ---------- nagłówek strony ---------- */
+.p-crumbs { color: var(--ink-subtle); }
+.p-crumbs a { color: var(--ink-subtle); text-decoration: none; }
+.p-crumbs a:hover { color: var(--ink); }
+.p-crumbs a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.p-crumbs > :last-child { color: var(--ink); }
+.p-title { margin: var(--space-4) 0 0; }
+.p-flush { margin: 0; }
+.p-lead { margin: var(--space-4) 0 0; max-width: var(--measure-lead); color: var(--ink-muted); }
+.p-lead--hero { margin-top: var(--space-6); max-width: var(--measure-hero); }
+.p-lead--about { margin-top: var(--space-6); max-width: var(--measure-about); }
+.p-lead--wide { max-width: var(--measure-text); }
+.p-lead--post { margin-top: var(--space-6); max-width: var(--measure-text); }
+.p-lead--history { margin-top: var(--space-8); max-width: var(--measure-wide); }
+.p-lead--history + .p-lead--history { margin-top: var(--space-4); }
+.p-lead--tight { margin-top: var(--space-2); max-width: none; }
+.p-post-head { max-width: var(--measure-heading); }
+
+/* ---------- obrazy stron ---------- */
+.p-cover { display: block; width: 100%; max-width: var(--measure-cover); height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin-top: var(--space-12); }
+.p-figure { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border: 1px solid var(--line); }
+
+/* ---------- treść wpisu (rich text z CMS) ---------- */
+.p-article { max-width: var(--measure-text); }
+.p-article > :first-child { margin-top: 0; }
+.p-article h2, .p-article h3 { margin: var(--space-12) 0 0; color: var(--ink); }
+.p-article h3 { margin-top: var(--space-8); }
+.p-article p, .p-article ul, .p-article ol, .p-article blockquote { margin: var(--space-4) 0 0; color: var(--ink-muted); }
+.p-article ul, .p-article ol { padding-left: var(--space-6); }
+.p-article li + li { margin-top: var(--space-2); }
+.p-article li > p { margin: 0; }
+.p-article strong, .p-article code { color: var(--ink); }
+.p-article a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: var(--space-1); }
+.p-article a:hover { color: var(--ink-muted); }
+.p-article a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.p-article blockquote { padding-left: var(--space-6); border-left: 1px solid var(--line-strong); }
+.p-article hr { margin: var(--space-12) 0 0; border: 0; border-top: 1px solid var(--line); }
+.p-article img { display: block; max-width: 100%; height: auto; margin-top: var(--space-8); }
+.p-article .acs-btn { text-decoration: none; }
+.p-article .acs-btn--primary { margin-top: var(--space-4); color: var(--on-inverse); }
+.p-article .acs-btn--primary:hover { color: var(--on-accent); }
+.p-article .acs-btn--ghost:hover { color: var(--ink); }
+
+/* ---------- najważniejsze zasady turnieju (rich text z CMS) ---------- */
+.p-rules { margin-top: var(--space-8); max-width: var(--measure-wide); color: var(--ink-muted); }
+.p-rules ul, .p-rules ol { margin: 0; padding-left: var(--space-6); }
+.p-rules li { margin-top: var(--space-2); }
+.p-rules li > p { margin: 0; }
+.p-rules p { margin: var(--space-4) 0 0; }
+.p-rules > p:first-child { margin-top: 0; }
+.p-rules h2, .p-rules h3 { margin: var(--space-8) 0 0; color: var(--ink); }
+.p-rules strong { color: var(--ink); font-weight: inherit; }
+.p-rules a { color: var(--ink); }
+.p-rules a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ---------- paginacja, pasek z wezwaniem, stan pusty ---------- */
+.p-pager { margin-top: var(--space-12); padding-top: var(--space-6); border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); }
+.p-pager__links { display: flex; flex-wrap: wrap; gap: var(--space-6); }
+.p-cta { display: flex; justify-content: space-between; align-items: center; gap: var(--space-8); padding: var(--space-12); border: 1px solid var(--line); background: var(--surface); }
+.p-cta__title { margin: var(--space-2) 0 0; }
+.p-cta__title:first-child { margin-top: 0; }
+.p-cta__text { margin: var(--space-2) 0 0; color: var(--ink-muted); }
+.p-pager__prev { flex-direction: row-reverse; }
+.p-pager__prev:hover .acs-btn__icon { transform: translateX(-3px); }
+.p-hint { margin: var(--space-4) 0 0; max-width: 60ch; color: var(--ink-subtle); }
+.p-empty { padding: var(--space-12); border: 1px dashed var(--line-strong); color: var(--ink-muted); }
+.p-empty > :first-child { margin-top: 0; }
+
+/* ---------- pomocnicze ---------- */
+.p-skip { position: absolute; left: var(--space-4); top: var(--space-4); z-index: 10; transform: translateY(-200%); }
+.p-skip:focus-visible { transform: none; }
+
+/* kafelki renderowane przez slot komponentu: rozciągnij kartę na wysokość wiersza */
+.acs-sponsors > :not(.acs-sponsor) { display: flex; flex-direction: column; }
+.acs-sponsors > * > .acs-sponsor { flex: 1 1 auto; }
+
+/* ---------- menu mobilne (<1024px): pełnoekranowy panel bg z linkami heading-1 ---------- */
+.acs-menu { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--bg); color: var(--ink); overflow-y: auto; }
+.acs-menu::backdrop { background: var(--bg); }
+.acs-menu__list { margin: 0; padding: var(--space-6); list-style: none; }
+.acs-menu__link { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) 0; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.acs-menu__link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.acs-menu__link[aria-current="page"] { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: var(--space-2); }
+.acs-menu__arrow { font-family: var(--font-mono); color: var(--ink-subtle); }
+.acs-menu__foot { padding: 0 var(--space-6) var(--space-12); }
+.acs-menu__foot a { color: var(--ink); }
+.acs-menu__foot a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+html:has(.acs-menu[open]) { overflow: hidden; }
+
+@media (max-width: 1023px) {
+  .p-wrap { padding-left: var(--space-6); padding-right: var(--space-6); }
+  .p-hero { grid-template-columns: 1fr; }
+  .p-cols-3, .p-teams { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .p-wrap { padding-left: var(--space-4); padding-right: var(--space-4); }
+  .p-main { padding-bottom: var(--space-16); }
+  .p-section { margin-top: var(--space-16); }
+  .p-head { padding-top: var(--space-12); }
+  .p-hero { padding: var(--space-12) 0 var(--space-16); gap: var(--space-8); }
+  .p-cols-3, .p-teams { grid-template-columns: 1fr; }
+  /* mniejsze style Display na telefonie (brandbook, sekcja Typografia) */
+  .display-xl { font-size: 56px; line-height: 52px; }
+  .display-lg { font-size: 40px; line-height: 40px; }
+  .heading-1 { font-size: 32px; line-height: 36px; }
+  .p-cta { flex-direction: column; align-items: flex-start; padding: var(--space-6); }
+  .p-empty { padding: var(--space-6); }
+  .acs-menu__list { padding: var(--space-4); }
+  .acs-menu__foot { padding: 0 var(--space-4) var(--space-12); }
+}
+
+/* ---------- dopasowania komponentów ---------- */
+/* <picture> w banerze nie może zmieniać układu: obraz dalej wypełnia całe tło */
+.acs-hero__bg picture { display: contents; }
+/* pudełko drabinki przewija się w poziomie, więc musi mieć widoczny fokus z klawiatury */
+.acs-bracket:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+[hidden] { display: none !important; }

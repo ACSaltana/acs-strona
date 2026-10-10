@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout title="Nie ma takiej strony" description="Strona, której szukasz, nie istnieje albo została przeniesiona.">
+  <section class="p-wrap p-head">
+    <div class="label p-accent">Błąd 404</div>
+    <h1 class="display-lg p-title">Nie ma takiej strony</h1>
+    <p class="lead p-lead">Adres jest błędny albo strona została przeniesiona. Aktualny turniej i wpisy znajdziesz na stronie głównej.</p>
+    <div class="p-row p-mt-8">
+      <Button href="/" icon="→">Strona główna</Button>
+      <Button href="/turnieje" variant="secondary">Turnieje</Button>
+    </div>
+  </section>
+</Layout>

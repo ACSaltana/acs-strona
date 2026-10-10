@@ -1,0 +1,13 @@
+---
+import ListaWpisow from '../../../../components/strony/ListaWpisow.astro';
+import { stronyListy, type StronaListy } from '../../../../lib/aktualnosci';
+import { KATEGORIE } from '../../../../lib/tresc';
+
+export async function getStaticPaths() {
+  return Promise.all(KATEGORIE.map(async (kategoria) => ({ params: { kategoria: kategoria.slug }, props: (await stronyListy(kategoria))[0]! })));
+}
+
+type Props = StronaListy;
+---
+
+<ListaWpisow {...Astro.props} />

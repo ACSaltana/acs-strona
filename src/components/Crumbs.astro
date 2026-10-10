@@ -1,0 +1,17 @@
+---
+// Okruszki nad tytułem podstrony. Ostatni element to bieżące miejsce i nie jest linkiem.
+interface Props {
+  items: { label: string; href?: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav class="label p-crumbs" aria-label="Okruszki">
+  {items.map((it, i) => (
+    <>
+      {i > 0 && ' / '}
+      {it.href ? <a href={it.href}>{it.label}</a> : <span aria-current="page">{it.label}</span>}
+    </>
+  ))}
+</nav>

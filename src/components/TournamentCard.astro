@@ -1,0 +1,97 @@
+---
+// Kafelek turnieju. Zostaje w systemie na wypadek kilku turniejów naraz; obecnie strona go nie używa
+// (brandbook, sekcja „Jeden turniej naraz”).
+import Media from './Media.astro';
+import StatusBadge from './StatusBadge.astro';
+import Tag from './Tag.astro';
+import type { Grafika, TournamentStatus } from '../lib/typy';
+
+interface Props {
+  title: string;
+  /** „14.11.2026 · 18:00” */
+  start: string;
+  /** „2 000 PLN” */
+  prizePool?: string;
+  prizeLabel?: string;
+  /** „5v5 · BO3” */
+  format?: string;
+  /** „16” albo „12 / 16” */
+  teams?: string | number;
+  game?: string;
+  status?: TournamentStatus;
+  /** Miniatura 16:9; bez niej kreskowane pole */
+  image?: Grafika;
+  imageAlt?: string;
+  href?: string;
+  /** Wariant na całą szerokość z banerem 21:9 w tle; jeden na stronę */
+  featured?: boolean;
+  /** Etykieta linku wariantu featured */
+  cta?: string;
+  class?: string;
+}
+
+const { title, start, prizePool, prizeLabel = 'Pula nagród', format, teams, game = 'CS2', status, image, imageAlt, href, featured = false, cta = 'Zobacz turniej', class: className } = Astro.props;
+const filled = (f: [string, string | number | undefined]) => f[1] !== undefined && f[1] !== null && f[1] !== '';
+const facts = (featured
+  ? ([['Format', format], ['Drużyny', teams], ['Start', start]] as [string, string | number | undefined][])
+  : ([['Format', format], ['Drużyny', teams], ['Gra', game]] as [string, string | number | undefined][])
+).filter(filled);
+const Root = href ? 'a' : 'article';
+---
+
+{
+  featured ? (
+    <Root class:list={['acs-tcard', 'acs-tcard--featured', 'acs-bracketed', className]} href={href}>
+      <div class="acs-feat__bg">
+        <Media src={image} alt={imageAlt} ratio="21:9" widths={[960, 1440, 1920]} sizes="(max-width: 1456px) 100vw, 1360px" />
+      </div>
+      <div class="acs-feat__body">
+        <div class="acs-thead__tags">
+          {status && <StatusBadge status={status} />}
+          <Tag>{game}</Tag>
+        </div>
+        <h3 class="acs-feat__title">{title}</h3>
+        <dl class="acs-feat__facts">
+          {facts.map((f) => (
+            <div class="acs-fact">
+              <dt>{f[0]}</dt>
+              <dd>{f[1]}</dd>
+            </div>
+          ))}
+          {prizePool && (
+            <div class="acs-fact acs-fact--prize">
+              <dt>{prizeLabel}</dt>
+              <dd>{prizePool}</dd>
+            </div>
+          )}
+        </dl>
+      </div>
+      {href && <span class="acs-feat__go" aria-hidden="true">{cta}<span class="acs-feat__arrow">→</span></span>}
+    </Root>
+  ) : (
+    <Root class:list={['acs-tcard', 'acs-bracketed', className]} href={href}>
+      <div class="acs-tcard__top">
+        <Media src={image} alt={imageAlt} widths={[320, 480, 800]} sizes="(max-width: 639px) 60vw, 260px">
+          {status && <StatusBadge slot="badges" status={status} />}
+        </Media>
+        <dl class="acs-tcard__facts">
+          {facts.map((f) => (
+            <div class="acs-fact">
+              <dt>{f[0]}</dt>
+              <dd>{f[1]}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <h3 class="acs-tcard__title">{title}</h3>
+      <p class="acs-tcard__date"><span class="acs-label">Start</span>{start}</p>
+      <div class="acs-tcard__prize">
+        <div>
+          <span class="acs-label">{prizeLabel}</span>
+          <span class="acs-tcard__prize-value">{prizePool}</span>
+        </div>
+        {href && <span class="acs-tcard__go" aria-hidden="true">→</span>}
+      </div>
+    </Root>
+  )
+}

@@ -1,0 +1,13 @@
+---
+import ListaWpisow from '../../../components/strony/ListaWpisow.astro';
+import { stronyListy, type StronaListy } from '../../../lib/aktualnosci';
+
+export async function getStaticPaths() {
+  // strona 1 to /aktualnosci
+  return (await stronyListy()).slice(1).map((lista) => ({ params: { strona: String(lista.strona) }, props: lista }));
+}
+
+type Props = StronaListy;
+---
+
+<ListaWpisow {...Astro.props} />

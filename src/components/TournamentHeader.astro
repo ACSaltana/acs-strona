@@ -1,0 +1,109 @@
+---
+import Media from './Media.astro';
+import StatusBadge from './StatusBadge.astro';
+import Tag from './Tag.astro';
+import type { Grafika, TournamentStatus } from '../lib/typy';
+
+interface Props {
+  title: string;
+  status?: TournamentStatus;
+  game?: string;
+  lead?: string;
+  start?: string;
+  format?: string;
+  teams?: string | number;
+  /** „Online” | „LAN” */
+  mode?: string;
+  prizePool?: string;
+  prizeLabel?: string;
+  /** Dodatkowy fakt nad pulą nagród, np. zwycięzca zakończonego turnieju */
+  extra?: { label: string; value: string };
+  /** Dwucyfrowe wartości policzone przez stronę */
+  countdown?: { d: string; h: string; m: string };
+  countdownLabel?: string;
+  /** Chwila, do której liczy odliczanie (ISO 8601). Z nią skrypt odświeża zegar co minutę i chowa go po czasie. */
+  countdownTarget?: string;
+  /** Baner 21:9 */
+  image?: Grafika;
+  imageAlt?: string;
+  class?: string;
+}
+
+const { title, status, game = 'CS2', lead, start, format, teams, mode, prizePool, prizeLabel = 'Pula nagród', extra, countdown, countdownLabel = 'Start za', countdownTarget, image, imageAlt, class: className } = Astro.props;
+const facts = ([
+  ['Start', start],
+  ['Format', format],
+  ['Drużyny', teams],
+  ['Tryb', mode],
+] as [string, string | number | undefined][]).filter((f) => f[1]);
+if (extra?.value) facts.push([extra.label, extra.value]);
+const hasActions = Astro.slots.has('default');
+---
+
+<section class:list={['acs-thead', className]}>
+  <Media src={image} alt={imageAlt} ratio="21:9" widths={[640, 960, 1440, 2040, 2520]} sizes="(max-width: 639px) 100vw, (max-width: 1456px) calc(100vw - 96px), 1360px" priority />
+  <div class="acs-thead__body">
+    <div>
+      <div class="acs-thead__tags">
+        {status && <StatusBadge status={status} />}
+        <Tag>{game}</Tag>
+      </div>
+      <h1 class="acs-thead__title">{title}</h1>
+      {lead && <p class="acs-thead__lead">{lead}</p>}
+      {hasActions && <div class="acs-thead__actions"><slot /></div>}
+    </div>
+    <aside class="acs-thead__panel" aria-label="Najważniejsze informacje">
+      {
+        countdown && (
+          <div class="acs-thead__count" data-countdown={countdownTarget}>
+            <span class="acs-label">{countdownLabel}</span>
+            <div class="acs-thead__clock" role="timer">
+              <span><span data-unit="d">{countdown.d}</span><small>D</small></span>
+              <span><span data-unit="h">{countdown.h}</span><small>H</small></span>
+              <span><span data-unit="m">{countdown.m}</span><small>M</small></span>
+            </div>
+          </div>
+        )
+      }
+      <dl class="acs-thead__facts">
+        {facts.map((f) => (
+          <div class="acs-fact">
+            <dt>{f[0]}</dt>
+            <dd>{f[1]}</dd>
+          </div>
+        ))}
+        {prizePool && (
+          <div class="acs-fact acs-fact--wide">
+            <dt>{prizeLabel}</dt>
+            <dd>{prizePool}</dd>
+          </div>
+        )}
+      </dl>
+    </aside>
+  </div>
+</section>
+
+{/* Skrypt jest wstawiony inline zaraz za zegarem, żeby poprawić wartości jeszcze przed pierwszym malowaniem strony. */}
+{
+  countdown && countdownTarget && (
+    <script is:inline>
+      (function () {
+        var box = document.querySelector('[data-countdown]');
+        if (!box) return;
+        var target = Date.parse(box.getAttribute('data-countdown'));
+        var pad = function (n) { return String(n).padStart(2, '0'); };
+        var timer;
+        function tick() {
+          var left = target - Date.now();
+          if (!(left > 0)) { box.hidden = true; clearInterval(timer); return; }
+          var minutes = Math.floor(left / 60000);
+          box.querySelector('[data-unit="d"]').textContent = pad(Math.floor(minutes / 1440));
+          box.querySelector('[data-unit="h"]').textContent = pad(Math.floor((minutes % 1440) / 60));
+          box.querySelector('[data-unit="m"]').textContent = pad(minutes % 60);
+        }
+        tick();
+        timer = setInterval(tick, 60000);
+      })();
+    </script>
+  )
+}

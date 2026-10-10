@@ -1,0 +1,83 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import PostCard from '../components/PostCard.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import TournamentHero from '../components/TournamentHero.astro';
+import { NAZWA, aktualnyTurniej, grafikaOg, pobierzTeksty, pobierzUstawienia, pobierzWpisy } from '../lib/tresc';
+
+const [teksty, ustawienia, turniej, wpisy] = await Promise.all([pobierzTeksty(), pobierzUstawienia(), aktualnyTurniej(), pobierzWpisy()]);
+const najnowsze = wpisy.slice(0, 3);
+const { glowna } = teksty;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: NAZWA,
+  alternateName: 'ACS',
+  url: new URL('/', Astro.site).href,
+  description: ustawienia.opis,
+  sameAs: ustawienia.socials.map((s) => s.href).filter(Boolean),
+};
+---
+
+<Layout description={ustawienia.opis} image={await grafikaOg(turniej?.baner)} jsonLd={jsonLd}>
+  <section class="p-wrap">
+    <div class="p-hero">
+      <div>
+        <div class="label p-accent">{glowna.etykieta}</div>
+        <h1 class="display-xl p-title">{glowna.tytul}</h1>
+        {glowna.lead && <p class="lead p-lead p-lead--hero">{glowna.lead}</p>}
+        <div class="p-row p-mt-10">
+          <Button href="#aktualnosci" variant="accent" icon="↓">Aktualności</Button>
+          <Button href="/o-nas" variant="secondary">O nas</Button>
+        </div>
+      </div>
+      {
+        turniej && (
+          <div>
+            <TournamentHero size="compact" title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} date={turniej.data} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} priority />
+            <div class="p-mt-4">
+              <Button href="#turniej" icon="↓">Zobacz turniej</Button>
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="p-wrap p-anchor" id="turniej">
+    {
+      turniej ? (
+        <TournamentHero title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} format={turniej.format} date={turniej.data} teams={turniej.liczbaDruzynBaner} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} />
+      ) : (
+        <div class="p-empty">
+          <p class="lead">Brak nadchodzących turniejów. Nowe ogłaszamy w Aktualnościach.</p>
+        </div>
+      )
+    }
+  </section>
+
+  <section class="p-wrap p-section p-anchor" id="aktualnosci">
+    <SectionHeader index="01" eyebrow="Aktualności" title="Aktualności" href="/aktualnosci">
+      <Button href="/aktualnosci" variant="ghost" icon="→">Wszystkie wpisy</Button>
+    </SectionHeader>
+    {
+      najnowsze.length > 0 ? (
+        <div class="p-cols-3 p-mt-8">
+          {najnowsze.map((w) => (
+            <PostCard title={w.tytul} date={w.dataTekst} dateTime={w.data} category={w.kategoria.nazwa} excerpt={w.zajawka} image={w.okladka} imageAlt={w.opisOkladki} href={w.href} />
+          ))}
+        </div>
+      ) : (
+        <div class="p-empty p-mt-8">
+          <p class="lead">Nie ma jeszcze wpisów.</p>
+        </div>
+      )
+    }
+  </section>
+
+  <section class="p-wrap p-section">
+    <ContactBlock email={ustawienia.email} eyebrow="02 / Kontakt" topics={glowna.kontaktTematy} />
+  </section>
+</Layout>

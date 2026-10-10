@@ -1,0 +1,37 @@
+---
+import Media from './Media.astro';
+import Tag from './Tag.astro';
+import type { Grafika } from '../lib/typy';
+
+interface Props {
+  title: string;
+  /** „02.10.2026” */
+  date: string;
+  /** „2026-10-02” */
+  dateTime?: string;
+  category?: string;
+  excerpt?: string;
+  image?: Grafika;
+  imageAlt?: string;
+  href?: string;
+  /** Poziom nagłówka tytułu: 3 pod nagłówkiem sekcji, 2 bezpośrednio pod h1 */
+  level?: 2 | 3;
+  /** Karta na pierwszym ekranie: okładka ładowana od razu */
+  priority?: boolean;
+  class?: string;
+}
+
+const { title, date, dateTime, category, excerpt, image, imageAlt, href, level = 3, priority = false, class: className } = Astro.props;
+const Root = href ? 'a' : 'article';
+const Heading = `h${level}` as 'h2' | 'h3';
+---
+
+<Root class:list={['acs-post', className]} href={href}>
+  <Media src={image} alt={imageAlt} widths={[480, 800, 1200]} sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 440px" priority={priority} />
+  <div class="acs-post__meta">
+    {category && <Tag>{category}</Tag>}
+    <time class="acs-label" datetime={dateTime}>{date}</time>
+  </div>
+  <Heading class="acs-post__title">{title}</Heading>
+  {excerpt && <p class="acs-post__excerpt">{excerpt}</p>}
+</Root>

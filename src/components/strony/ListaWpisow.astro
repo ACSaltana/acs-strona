@@ -1,0 +1,62 @@
+---
+// Wspólny szablon listy aktualności: wszystkie wpisy, kategoria i kolejne strony.
+import Layout from '../../layouts/Layout.astro';
+import Button from '../Button.astro';
+import Crumbs from '../Crumbs.astro';
+import PostCard from '../PostCard.astro';
+import { adresListy, type StronaListy } from '../../lib/aktualnosci';
+import { KATEGORIE, pobierzTeksty } from '../../lib/tresc';
+
+type Props = StronaListy;
+
+const { wpisy, strona, stron, kategoria } = Astro.props;
+const teksty = await pobierzTeksty();
+const tytul = [kategoria ? `Aktualności: ${kategoria.mnoga}` : 'Aktualności', strona > 1 && `strona ${strona}`].filter(Boolean).join(', ');
+const opis = [
+  kategoria ? `${kategoria.mnoga} Altana Championship Series.` : 'Aktualności Altana Championship Series.',
+  teksty.aktualnosci.lead ?? 'Ogłoszenia, relacje z turniejów i poradniki dla drużyn.',
+  strona > 1 && `Strona ${strona} z ${stron}.`,
+].filter(Boolean).join(' ');
+const okruszki = kategoria ? [{ label: 'ACS', href: '/' }, { label: 'Aktualności', href: '/aktualnosci' }, { label: kategoria.mnoga }] : [{ label: 'ACS', href: '/' }, { label: 'Aktualności' }];
+---
+
+<Layout title={tytul} description={opis}>
+  <section class="p-wrap p-head">
+    <Crumbs items={okruszki} />
+    <h1 class="display-lg p-title">Aktualności</h1>
+    {teksty.aktualnosci.lead && <p class="lead p-lead">{teksty.aktualnosci.lead}</p>}
+
+    <nav class="p-row p-mt-8" aria-label="Kategorie">
+      <Button href={adresListy()} size="sm" variant={kategoria ? 'secondary' : 'primary'} aria-current={kategoria ? undefined : 'true'}>Wszystkie</Button>
+      {KATEGORIE.map((k) => (
+        <Button href={adresListy(k)} size="sm" variant={kategoria?.id === k.id ? 'primary' : 'secondary'} aria-current={kategoria?.id === k.id ? 'true' : undefined}>{k.mnoga}</Button>
+      ))}
+    </nav>
+
+    {
+      wpisy.length > 0 ? (
+        <div class="p-cols-3 p-cols-3--posts p-mt-12">
+          {wpisy.map((w, i) => (
+            <PostCard level={2} title={w.tytul} date={w.dataTekst} dateTime={w.data} category={w.kategoria.nazwa} excerpt={w.zajawka} image={w.okladka} imageAlt={w.opisOkladki} href={w.href} priority={i === 0} />
+          ))}
+        </div>
+      ) : (
+        <div class="p-empty p-mt-12">
+          <p class="lead">W tej kategorii nie ma jeszcze wpisów.</p>
+        </div>
+      )
+    }
+
+    {
+      stron > 1 && (
+        <nav class="p-pager" aria-label="Strony listy">
+          <span class="label p-subtle">Strona {strona} z {stron}</span>
+          <div class="p-pager__links">
+            {strona > 1 && <Button href={adresListy(kategoria, strona - 1)} variant="ghost" icon="←" class="p-pager__prev" rel="prev">Nowsze wpisy</Button>}
+            {strona < stron && <Button href={adresListy(kategoria, strona + 1)} variant="ghost" icon="→" rel="next">Starsze wpisy</Button>}
+          </div>
+        </nav>
+      )
+    }
+  </section>
+</Layout>

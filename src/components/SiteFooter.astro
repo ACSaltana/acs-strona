@@ -1,0 +1,45 @@
+---
+import Img from './Img.astro';
+import type { NavItem, Social } from '../lib/typy';
+
+interface Props {
+  links: NavItem[];
+  socials?: Social[];
+  year?: number;
+  copyright?: string;
+  class?: string;
+}
+
+const { links, socials = [], year = new Date().getFullYear(), copyright, class: className } = Astro.props;
+---
+
+<footer class:list={['acs-footer', className]}>
+  <nav class="acs-footer__links" aria-label="Stopka">
+    {links.map((l, i) => (
+      <>
+        {i > 0 && <span class="acs-footer__sep" aria-hidden="true">|</span>}
+        <a href={l.href}>{l.label}</a>
+      </>
+    ))}
+  </nav>
+  {
+    socials.length > 0 && (
+      <ul class="acs-footer__social" aria-label="Media społecznościowe">
+        {socials.map((s) => (
+          <li>
+            {s.href ? (
+              <a class="acs-social" href={s.href} aria-label={s.icon ? s.label : undefined} rel="noopener me">
+                {s.icon ? <Img src={s.icon} alt="" widths={[40]} sizes="20px" /> : s.label}
+              </a>
+            ) : (
+              <span class="acs-social" role="img" aria-label={`${s.label}: profil wkrótce`}>
+                {s.icon ? <Img src={s.icon} alt="" widths={[40]} sizes="20px" /> : s.label}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  <p class="acs-footer__copy">{copyright || `Copyright ${year} © | Wszelkie prawa zastrzeżone`}</p>
+</footer>

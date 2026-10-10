@@ -1,0 +1,24 @@
+---
+// Pasek z wezwaniem do aktualnego turnieju: pod wpisem („Najbliższy turniej”) i na stronie O nas.
+import Button from './Button.astro';
+import type { Turniej } from '../lib/tresc';
+
+interface Props {
+  turniej: Turniej;
+  /** Własny nagłówek i tekst zamiast nazwy i faktów turnieju */
+  title?: string;
+  text?: string;
+}
+
+const { turniej, title, text } = Astro.props;
+const fakty = [turniej.data, turniej.format, turniej.pula && `pula nagród ${turniej.pula}`].filter(Boolean).join(' · ');
+---
+
+<div class="p-cta">
+  <div>
+    {!title && <div class="label p-accent">{turniej.kicker}</div>}
+    <h2 class="heading-1 p-cta__title">{title ?? turniej.tytul}</h2>
+    <p class:list={[text ? 'lead' : 'meta', 'p-cta__text']}>{text ?? fakty}</p>
+  </div>
+  <Button href={turniej.href} icon="→">Zobacz turniej</Button>
+</div>

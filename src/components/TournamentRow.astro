@@ -1,0 +1,23 @@
+---
+interface Props {
+  title: string;
+  /** „18–19.07.2026” */
+  date: string;
+  winner?: string;
+  prizePool?: string;
+  prizeLabel?: string;
+  href?: string;
+  class?: string;
+}
+
+const { title, date, winner, prizePool, prizeLabel = 'Pula nagród', href, class: className } = Astro.props;
+const Root = href ? 'a' : 'div';
+---
+
+<Root class:list={['acs-trow', className]} href={href}>
+  <span class="acs-trow__date">{date}</span>
+  <span class="acs-trow__title">{title}</span>
+  <span class="acs-trow__fact"><span class="acs-label">Zwycięzca</span><span class="acs-trow__value">{winner || '—'}</span></span>
+  <span class="acs-trow__fact"><span class="acs-label">{prizeLabel}</span><span class="acs-trow__prize">{prizePool}</span></span>
+  {href ? <span class="acs-trow__go" aria-hidden="true">→</span> : <span />}
+</Root>

@@ -1,0 +1,35 @@
+{
+  "name": "acs-strona",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/markdoc": "^2.0.11",
+    "@astrojs/react": "^7.0.1",
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/vercel": "^11.0.13",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/saira": "^5.3.0",
+    "@fontsource/saira-condensed": "^5.3.0",
+    "@keystatic/astro": "^6.0.0",
+    "@keystatic/core": "^0.6.9",
+    "astro": "^7.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "playwright-core": "^1.64.0",
+    "typescript": "^6.0.3"
+  }
+}

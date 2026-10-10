@@ -1,0 +1,30 @@
+---
+interface Props {
+  /** primary: jeden na ekran; accent: „Aktualności” w hero; secondary: akcje poboczne i filtry; ghost: link tekstowy ze strzałką */
+  variant?: 'primary' | 'accent' | 'secondary' | 'ghost';
+  size?: 'md' | 'sm';
+  /** Znak po etykiecie, zwykle "→" albo "↗" */
+  icon?: string;
+  /** Z adresem renderuje <a> */
+  href?: string;
+  class?: string;
+  [attr: string]: unknown;
+}
+
+const { variant = 'primary', size = 'md', icon, href, class: className, ...rest } = Astro.props;
+const cls = ['acs-btn', `acs-btn--${variant}`, size === 'sm' && 'acs-btn--sm', className];
+---
+
+{
+  href ? (
+    <a href={href} class:list={cls} {...rest}>
+      <span class="acs-btn__text"><slot /></span>
+      {icon && <span class="acs-btn__icon" aria-hidden="true">{icon}</span>}
+    </a>
+  ) : (
+    <button type="button" class:list={cls} {...rest}>
+      <span class="acs-btn__text"><slot /></span>
+      {icon && <span class="acs-btn__icon" aria-hidden="true">{icon}</span>}
+    </button>
+  )
+}

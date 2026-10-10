@@ -1,0 +1,39 @@
+---
+import Img from './Img.astro';
+import { initials, type Grafika } from '../lib/typy';
+
+interface Props {
+  name?: string;
+  /** Kwadrat, wersja jasna, przezroczyste tło; bez logo widać inicjały */
+  logo?: Grafika;
+  /** Skrót („NPT”) albo seed („Seed 1”) */
+  meta?: string;
+  /** Wolne miejsce w trakcie zapisów */
+  empty?: boolean;
+  class?: string;
+}
+
+const { name, logo, meta, empty = false, class: className } = Astro.props;
+---
+
+{
+  empty ? (
+    <div class:list={['acs-team', 'acs-team--empty', className]}>
+      <div class="acs-team__logo" aria-hidden="true" />
+      <div>
+        <p class="acs-team__name">{name || 'Wolne miejsce'}</p>
+        {meta && <p class="acs-team__meta">{meta}</p>}
+      </div>
+    </div>
+  ) : (
+    <div class:list={['acs-team', className]}>
+      <div class="acs-team__logo">
+        {logo ? <Img src={logo} alt={`Logo ${name}`} widths={[64, 128, 192]} sizes="64px" /> : <span class="acs-team__initials" aria-hidden="true">{initials(name)}</span>}
+      </div>
+      <div>
+        <p class="acs-team__name">{name}</p>
+        {meta && <p class="acs-team__meta">{meta}</p>}
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,162 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Bracket from '../../components/Bracket.astro';
+import Button from '../../components/Button.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
+import SponsorTile from '../../components/SponsorTile.astro';
+import Tag from '../../components/Tag.astro';
+import TeamTile from '../../components/TeamTile.astro';
+import TournamentHeader from '../../components/TournamentHeader.astro';
+import { chwila, odliczanie } from '../../lib/daty';
+import { mailto } from '../../lib/format';
+import { NAZWA, celOdliczania, grafikaOg, pobierzTurnieje, pobierzUstawienia, type Turniej } from '../../lib/tresc';
+
+export async function getStaticPaths() {
+  return (await pobierzTurnieje()).map((turniej) => ({ params: { slug: turniej.slug }, props: { turniej } }));
+}
+
+interface Props {
+  turniej: Turniej;
+}
+
+const { turniej } = Astro.props;
+const ustawienia = await pobierzUstawienia();
+const { Content } = await render(turniej.wpis);
+const maZasady = Boolean(turniej.wpis.body?.trim());
+const zapisy = turniej.status === 'open';
+const zakonczony = turniej.status === 'finished';
+
+const zegar = celOdliczania(turniej);
+const pozostalo = zegar && odliczanie(zegar.cel);
+
+// numery sekcji liczone po kolei, bo sekcja Sponsorzy znika, gdy turniej ich nie ma
+let numer = 0;
+const kolejny = () => String(++numer).padStart(2, '0');
+
+const adres = new URL(turniej.href, Astro.site).href;
+const obrazOg = await grafikaOg(turniej.baner);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: turniej.tytul,
+  description: turniej.opis,
+  url: adres,
+  startDate: chwila(turniej.start).toISOString(),
+  endDate: chwila(`${turniej.koniec ?? turniej.start.slice(0, 10)}T23:59`).toISOString(),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: turniej.tryb === 'LAN' ? 'https://schema.org/OfflineEventAttendanceMode' : 'https://schema.org/OnlineEventAttendanceMode',
+  ...(turniej.tryb === 'LAN' ? {} : { location: { '@type': 'VirtualLocation', url: adres } }),
+  ...(obrazOg ? { image: [new URL(obrazOg, Astro.site).href] } : {}),
+  organizer: { '@type': 'Organization', name: NAZWA, url: new URL('/', Astro.site).href },
+};
+---
+
+<Layout title={turniej.tytul} description={turniej.opis} image={obrazOg} jsonLd={jsonLd}>
+  <section class="p-wrap p-top">
+    <Crumbs items={[{ label: 'Turnieje', href: '/turnieje' }, { label: turniej.tytul }]} />
+    <div class="p-mt-6">
+      <TournamentHeader
+        title={turniej.tytul}
+        status={turniej.status}
+        game={turniej.gra}
+        lead={turniej.lead}
+        start={turniej.data}
+        format={turniej.format}
+        teams={turniej.liczbaDruzyn}
+        mode={turniej.tryb}
+        prizePool={turniej.pula}
+        extra={zakonczony && turniej.zwyciezca ? { label: 'Zwycięzca', value: turniej.zwyciezca.nazwa } : undefined}
+        countdown={pozostalo}
+        countdownLabel={zegar?.etykieta}
+        countdownTarget={zegar?.cel.toISOString()}
+        image={turniej.baner}
+        imageAlt={turniej.opisGrafiki}
+      >
+        {
+          zapisy ? (
+            <>
+              <Button href={mailto(ustawienia.email, `Zgłoszenie – ${turniej.tytul}`)} icon="→">Zgłoś drużynę</Button>
+              <Button href="#drabinka" variant="secondary">Drabinka</Button>
+            </>
+          ) : (
+            <>
+              <Button href="#drabinka" icon="↓">Zobacz drabinkę</Button>
+              <Button href="#regulamin" variant="secondary">Regulamin</Button>
+            </>
+          )
+        }
+      </TournamentHeader>
+      {zapisy && <p class="body-sm p-hint">Zgłoszenia przyjmujemy mailowo. W temacie podaj nazwę turnieju i drużyny.</p>}
+    </div>
+  </section>
+
+  <section class="p-wrap p-section p-anchor" id="drabinka">
+    <SectionHeader index={kolejny()} eyebrow="Drabinka" title="Drabinka turnieju">
+      {turniej.etykietaDrabinki && <Tag>{turniej.etykietaDrabinki}</Tag>}
+    </SectionHeader>
+    <div class="p-mt-8">
+      <Bracket rounds={turniej.drabinka.rounds} />
+    </div>
+  </section>
+
+  <section class="p-wrap p-section p-anchor" id="druzyny">
+    <SectionHeader index={kolejny()} eyebrow="Drużyny" title="Drużyny">
+      <Tag>{turniej.liczbaDruzyn}</Tag>
+    </SectionHeader>
+    {
+      turniej.druzyny.length + turniej.wolneMiejsca > 0 ? (
+        <div class="p-teams p-mt-8">
+          {turniej.druzyny.map((d) => (
+            <TeamTile name={d.nazwa} logo={d.logo} meta={d.skrot} />
+          ))}
+          {Array.from({ length: turniej.wolneMiejsca }, () => (
+            <TeamTile empty />
+          ))}
+        </div>
+      ) : (
+        <div class="p-empty p-mt-8">
+          <p class="lead">Listę drużyn opublikujemy po otwarciu zapisów.</p>
+        </div>
+      )
+    }
+  </section>
+
+  <section class="p-wrap p-section p-anchor" id="regulamin">
+    <SectionHeader index={kolejny()} eyebrow="Regulamin" title="Najważniejsze zasady" />
+    {
+      maZasady ? (
+        <div class="body p-rules">
+          <Content />
+        </div>
+      ) : (
+        !turniej.regulaminPdf && (
+          <div class="p-empty p-mt-8">
+            <p class="lead">Regulamin opublikujemy przed startem zapisów.</p>
+          </div>
+        )
+      )
+    }
+    {
+      turniej.regulaminPdf && (
+        <div class="p-mt-8">
+          <Button href={turniej.regulaminPdf} variant="secondary" icon="↗" target="_blank" rel="noopener">Pełny regulamin (PDF)</Button>
+        </div>
+      )
+    }
+  </section>
+
+  {
+    turniej.sponsorzy.length > 0 && (
+      <section class="p-wrap p-section">
+        <SectionHeader index={kolejny()} eyebrow="Sponsorzy" title="Sponsorzy turnieju" />
+        <div class="acs-sponsors p-mt-8">
+          {turniej.sponsorzy.map((s) => (
+            <SponsorTile name={s.nazwa} logo={s.logo} tier={s.glowny ? 'Sponsor główny' : 'Partner'} size={s.glowny ? 'lg' : 'md'} href={s.www} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Layout>

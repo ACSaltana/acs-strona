@@ -1,0 +1,10 @@
+---
+// Tekst w „kodzie” to u nas dana do przepisania (np. temat wiadomości): styl meta, mono.
+interface Props {
+  content: string;
+}
+
+const { content } = Astro.props;
+---
+
+<code class="meta">{content}</code>

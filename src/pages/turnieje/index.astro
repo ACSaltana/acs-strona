@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
+import TournamentHero from '../../components/TournamentHero.astro';
+import TournamentRow from '../../components/TournamentRow.astro';
+import { aktualnyTurniej, archiwumTurniejow, grafikaOg, pobierzTeksty } from '../../lib/tresc';
+
+const [teksty, turniej, archiwum] = await Promise.all([pobierzTeksty(), aktualnyTurniej(), archiwumTurniejow()]);
+const opis = 'Aktualny turniej Altana Championship Series w Counter-Strike 2 oraz archiwum poprzednich edycji z wynikami i drabinkami.';
+---
+
+<Layout title="Turnieje" description={opis} image={await grafikaOg(turniej?.baner)}>
+  <section class="p-wrap p-head">
+    <Crumbs items={[{ label: 'ACS', href: '/' }, { label: 'Turnieje' }]} />
+    <h1 class="display-lg p-title">Turnieje</h1>
+    {teksty.turnieje.lead && <p class="lead p-lead p-lead--wide">{teksty.turnieje.lead}</p>}
+    <div class="p-mt-12">
+      {
+        turniej ? (
+          <TournamentHero title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} format={turniej.format} date={turniej.data} teams={turniej.liczbaDruzynBaner} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} priority />
+        ) : (
+          <div class="p-empty">
+            <p class="lead">Brak nadchodzących turniejów. Nowe ogłaszamy w Aktualnościach.</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  {
+    archiwum.length > 0 && (
+      <section class="p-wrap p-section">
+        <SectionHeader index="01" eyebrow="Archiwum" title="Poprzednie turnieje" />
+        <div class="p-rows p-mt-8">
+          {archiwum.map((t) => (
+            <TournamentRow title={t.tytul} date={t.data} winner={t.zwyciezca?.nazwa} prizePool={t.pula} href={t.href} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Layout>

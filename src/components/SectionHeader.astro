@@ -1,0 +1,25 @@
+---
+interface Props {
+  title: string;
+  /** "01", "02"… */
+  index?: string;
+  eyebrow?: string;
+  /** Tytuł staje się linkiem do strony sekcji */
+  href?: string;
+  level?: 1 | 2 | 3;
+  class?: string;
+}
+
+const { title, index, eyebrow, href, level = 2, class: className } = Astro.props;
+const Heading = `h${level}` as 'h1' | 'h2' | 'h3';
+---
+
+<header class:list={['acs-sechead', className]}>
+  <div>
+    {(index || eyebrow) && <div class="acs-label">{index && <span class="acs-sechead__index">{index} / </span>}{eyebrow}</div>}
+    <Heading class="acs-sechead__title">
+      {href ? <a class="acs-sechead__link" href={href}>{title}<span class="acs-sechead__arrow" aria-hidden="true">→</span></a> : title}
+    </Heading>
+  </div>
+  <slot />
+</header>

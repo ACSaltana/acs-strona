@@ -1,0 +1,28 @@
+glowna:
+  etykieta: Turnieje Counter-Strike 2
+  tytul: Altana Championship Series
+  lead: Jeden duży turniej CS2 co kilka miesięcy. Zapowiadamy go z wyprzedzeniem, żeby drużyny zdążyły się przygotować.
+  kontaktTematy: Zgłoszenia drużyn, pytania o turnieje, współpraca.
+turnieje:
+  lead: Organizujemy jeden duży turniej co 2–4 miesiące i zapowiadamy go z wyprzedzeniem. Poprzednie edycje, wyniki i drabinki znajdziesz w archiwum.
+aktualnosci:
+  lead: Ogłoszenia, relacje z turniejów i poradniki dla drużyn.
+kontakt:
+  lead: Zgłoszenia drużyn, pytania o turnieje i współpraca. Wszystko załatwiamy mailowo.
+  wskazowka: W temacie wiadomości podaj, czego dotyczy sprawa.
+  tematy:
+    - tytul: Zgłoszenie drużyny
+      temat: Zgłoszenie – [turniej] – [drużyna]
+      opis: Nazwa, skrót, logo i skład drużyny.
+      linkEtykieta: Jak zgłosić drużynę
+      linkAdres: /aktualnosci/jak-zglosic-druzyne
+    - tytul: Pytania o turniej
+      temat: Pytanie – [turniej]
+      opis: Format, drabinka, godziny meczów, regulamin.
+      linkEtykieta: ''
+      linkAdres: ''
+    - tytul: Współpraca i sponsoring
+      temat: Współpraca – [firma]
+      opis: Sponsoring turnieju, partnerstwa, akredytacje medialne.
+      linkEtykieta: ''
+      linkAdres: ''

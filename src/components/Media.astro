@@ -1,0 +1,33 @@
+---
+// Wewnętrzny: miniatura albo kreskowane pole z wymaganym formatem, gdy grafiki brak.
+import Img from './Img.astro';
+import type { Grafika } from '../lib/typy';
+
+interface Props {
+  src?: Grafika;
+  alt?: string;
+  ratio?: '16:9' | '21:9';
+  spec?: string;
+  widths?: number[];
+  sizes?: string;
+  priority?: boolean;
+}
+
+const { src, alt, ratio = '16:9', spec, widths, sizes, priority } = Astro.props;
+const label = spec ?? (ratio === '21:9' ? '21:9 · 2520×1080' : '16:9 · 1600×900');
+const hasBadges = Astro.slots.has('badges');
+---
+
+{
+  src ? (
+    <div class="acs-media">
+      <Img src={src} alt={alt ?? ''} widths={widths} sizes={sizes} priority={priority} />
+      {hasBadges && <div class="acs-media__badges"><slot name="badges" /></div>}
+    </div>
+  ) : (
+    <div class="acs-media acs-media--empty" role="img" aria-label={alt || 'Miejsce na miniaturę'}>
+      {hasBadges && <div class="acs-media__badges"><slot name="badges" /></div>}
+      <span class="acs-media__spec" aria-hidden="true">{label}</span>
+    </div>
+  )
+}

@@ -1,0 +1,12 @@
+---
+// Linki zewnętrzne otwierają się w nowej karcie.
+interface Props {
+  href: string;
+  title?: string;
+}
+
+const { href, title } = Astro.props;
+const zewnetrzny = /^https?:\/\//.test(href);
+---
+
+<a href={href} title={title} target={zewnetrzny ? '_blank' : undefined} rel={zewnetrzny ? 'noopener' : undefined}><slot /></a>
