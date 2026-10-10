@@ -122,7 +122,8 @@ a { color: var(--link); }
 .p-cta__text { margin: var(--space-2) 0 0; color: var(--ink-muted); }
 .p-pager__prev { flex-direction: row-reverse; }
 .p-pager__prev:hover .acs-btn__icon { transform: translateX(-3px); }
-.p-hint { margin: var(--space-4) 0 0; max-width: 60ch; color: var(--ink-subtle); }
+/* dopisek pod przyciskami nagłówka turnieju: zawsze w osobnej linii */
+.p-hint { flex-basis: 100%; margin: var(--space-1) 0 0; color: var(--ink-subtle); }
 .p-empty { padding: var(--space-12); border: 1px dashed var(--line-strong); color: var(--ink-muted); }
 .p-empty > :first-child { margin-top: 0; }
 

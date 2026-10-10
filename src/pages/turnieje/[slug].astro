@@ -78,6 +78,7 @@ const jsonLd = {
             <>
               <Button href={mailto(ustawienia.email, `Zgłoszenie – ${turniej.tytul}`)} icon="→">Zgłoś drużynę</Button>
               <Button href="#drabinka" variant="secondary">Drabinka</Button>
+              <p class="body-sm p-hint">Zgłoszenia przyjmujemy mailowo. W temacie podaj nazwę turnieju i drużyny.</p>
             </>
           ) : (
             <>
@@ -87,7 +88,6 @@ const jsonLd = {
           )
         }
       </TournamentHeader>
-      {zapisy && <p class="body-sm p-hint">Zgłoszenia przyjmujemy mailowo. W temacie podaj nazwę turnieju i drużyny.</p>}
     </div>
   </section>
 
