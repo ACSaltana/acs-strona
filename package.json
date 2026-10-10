@@ -9,8 +9,11 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "check": "astro check"
+    "podglad": "node scripts/podglad.mjs",
+    "check": "astro check",
+    "test": "node scripts/sprawdz.mjs",
+    "zrzuty": "node scripts/zrzuty.mjs",
+    "seed": "node scripts/seed.mjs"
   },
   "dependencies": {
     "@astrojs/markdoc": "^2.0.11",

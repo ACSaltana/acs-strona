@@ -1,13 +1,14 @@
 ---
 import ListaWpisow from '../../../../components/strony/ListaWpisow.astro';
-import { stronyListy, type StronaListy } from '../../../../lib/aktualnosci';
+import { stronaListy } from '../../../../lib/aktualnosci';
 import { KATEGORIE } from '../../../../lib/tresc';
 
-export async function getStaticPaths() {
-  return Promise.all(KATEGORIE.map(async (kategoria) => ({ params: { kategoria: kategoria.slug }, props: (await stronyListy(kategoria))[0]! })));
+export function getStaticPaths() {
+  return KATEGORIE.map((kategoria) => ({ params: { kategoria: kategoria.slug } }));
 }
 
-type Props = StronaListy;
+const lista = await stronaListy(Astro.params.kategoria);
+if (!lista) return new Response(null, { status: 404 });
 ---
 
-<ListaWpisow {...Astro.props} />
+<ListaWpisow {...lista} />

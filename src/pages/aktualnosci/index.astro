@@ -1,8 +1,8 @@
 ---
 import ListaWpisow from '../../components/strony/ListaWpisow.astro';
-import { stronyListy } from '../../lib/aktualnosci';
+import { stronaListy } from '../../lib/aktualnosci';
 
-const [pierwsza] = await stronyListy();
+const lista = (await stronaListy())!;
 ---
 
-<ListaWpisow {...pierwsza!} />
+<ListaWpisow {...lista} />

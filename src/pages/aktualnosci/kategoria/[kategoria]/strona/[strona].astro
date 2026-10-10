@@ -1,15 +1,16 @@
 ---
 import ListaWpisow from '../../../../../components/strony/ListaWpisow.astro';
-import { stronyListy, type StronaListy } from '../../../../../lib/aktualnosci';
+import { stronaListy, stronyListy } from '../../../../../lib/aktualnosci';
 import { KATEGORIE } from '../../../../../lib/tresc';
 
 export async function getStaticPaths() {
   const listy = await Promise.all(KATEGORIE.map((kategoria) => stronyListy(kategoria)));
   // strona 1 to /aktualnosci/kategoria/<kategoria>
-  return listy.flatMap((strony) => strony.slice(1)).map((lista) => ({ params: { kategoria: lista.kategoria!.slug, strona: String(lista.strona) }, props: lista }));
+  return listy.flatMap((strony) => strony.slice(1)).map((lista) => ({ params: { kategoria: lista.kategoria!.slug, strona: String(lista.strona) } }));
 }
 
-type Props = StronaListy;
+const lista = await stronaListy(Astro.params.kategoria, Astro.params.strona);
+if (!lista) return new Response(null, { status: 404 });
 ---
 
-<ListaWpisow {...Astro.props} />
+<ListaWpisow {...lista} />

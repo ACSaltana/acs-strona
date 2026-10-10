@@ -22,6 +22,8 @@ export default defineConfig({
   site,
   trailingSlash: 'never',
   adapter: vercel(),
+  // Cały CSS (ok. 7 KB po kompresji) jest wstawiany w HTML: bez osobnego żądania blokującego pierwsze malowanie.
+  build: { inlineStylesheets: 'always' },
   integrations: [
     markdoc(),
     sitemap(),

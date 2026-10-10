@@ -7,17 +7,15 @@ import Img from '../../components/Img.astro';
 import Tag from '../../components/Tag.astro';
 import TournamentCta from '../../components/TournamentCta.astro';
 import { adresListy } from '../../lib/aktualnosci';
-import { NAZWA, aktualnyTurniej, grafikaOg, pobierzWpisy, type Wpis } from '../../lib/tresc';
+import { NAZWA, aktualnyTurniej, grafikaOg, pobierzWpisy } from '../../lib/tresc';
 
 export async function getStaticPaths() {
-  return (await pobierzWpisy()).map((wpis) => ({ params: { slug: wpis.slug }, props: { wpis } }));
+  return (await pobierzWpisy()).map((wpis) => ({ params: { slug: wpis.slug } }));
 }
 
-interface Props {
-  wpis: Wpis;
-}
-
-const { wpis } = Astro.props;
+// Dane czytamy tutaj, a nie przez props z getStaticPaths (patrz turnieje/[slug].astro).
+const wpis = (await pobierzWpisy()).find((w) => w.slug === Astro.params.slug);
+if (!wpis) return new Response(null, { status: 404 });
 const { Content } = await render(wpis.wpis);
 const turniej = await aktualnyTurniej();
 const opis = wpis.zajawka ?? `${wpis.kategoria.nazwa} Altana Championship Series z ${wpis.dataTekst}.`;

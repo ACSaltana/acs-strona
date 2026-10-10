@@ -11,17 +11,16 @@ import TeamTile from '../../components/TeamTile.astro';
 import TournamentHeader from '../../components/TournamentHeader.astro';
 import { chwila, odliczanie } from '../../lib/daty';
 import { mailto } from '../../lib/format';
-import { NAZWA, celOdliczania, grafikaOg, pobierzTurnieje, pobierzUstawienia, type Turniej } from '../../lib/tresc';
+import { NAZWA, celOdliczania, grafikaOg, pobierzTurnieje, pobierzUstawienia } from '../../lib/tresc';
 
 export async function getStaticPaths() {
-  return (await pobierzTurnieje()).map((turniej) => ({ params: { slug: turniej.slug }, props: { turniej } }));
+  return (await pobierzTurnieje()).map((turniej) => ({ params: { slug: turniej.slug } }));
 }
 
-interface Props {
-  turniej: Turniej;
-}
-
-const { turniej } = Astro.props;
+// Dane czytamy tutaj, a nie przez props z getStaticPaths: w trybie dev lista ścieżek jest
+// zapamiętywana, więc zmiana zapisana w panelu nie byłaby widoczna bez restartu.
+const turniej = (await pobierzTurnieje()).find((t) => t.slug === Astro.params.slug);
+if (!turniej) return new Response(null, { status: 404 });
 const ustawienia = await pobierzUstawienia();
 const { Content } = await render(turniej.wpis);
 const maZasady = Boolean(turniej.wpis.body?.trim());

@@ -131,9 +131,11 @@ export default config({
             description: 'Dodaj tylko mecze, które mają godzinę, drużyny albo wynik. Pozostałe miejsca drabinki strona pokaże jako „TBD” i „ASAP”.',
             itemLabel: (props) => {
               const runda = RUNDY.find((r) => r.value === props.fields.runda.value)?.label ?? 'Mecz';
-              const a = props.fields.druzynaA.value ?? '?';
-              const b = props.fields.druzynaB.value ?? '?';
-              return `${runda} ${props.fields.pozycja.value ?? ''}: ${a} – ${b}`;
+              // puste pole drużyny = zwycięzca poprzedniej rundy albo TBD
+              const a = props.fields.druzynaA.value ?? 'auto';
+              const b = props.fields.druzynaB.value ?? 'auto';
+              const live = props.fields.naZywo.value ? ' · na żywo' : '';
+              return `${runda} ${props.fields.pozycja.value ?? ''}: ${a} – ${b}${live}`;
             },
           },
         ),
