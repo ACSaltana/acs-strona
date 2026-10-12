@@ -12,6 +12,12 @@
   --measure-cover: 1040px;
   /* 40px: odstęp przycisków w hero, między space-8 a space-12 */
   --space-10: calc(var(--space-8) + var(--space-2));
+  /* Hero strony głównej: szerokość znaku i jednorazowe wejście po załadowaniu. Brandbook nie ma dla nich wartości. */
+  --size-mark: 480px;
+  --size-mark-md: 320px;
+  --size-mark-sm: 152px;
+  --intro-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --intro-step: 280ms;
 }
 
 html, body { background: var(--bg); }
@@ -75,6 +81,25 @@ a { color: var(--link); }
 .p-lead--history + .p-lead--history { margin-top: var(--space-4); }
 .p-lead--tight { margin-top: var(--space-2); max-width: none; }
 .p-post-head { max-width: var(--measure-heading); }
+
+/* ---------- hero strony głównej: znak ACS i wejście po załadowaniu ---------- */
+/* Stan końcowy jest stanem bazowym, a animacje opisują tylko początek. Bez animacji
+   (prefers-reduced-motion, starsza przeglądarka) wszystko jest widoczne od razu. */
+.p-logo { display: block; width: 100%; height: auto; color: var(--ink); }
+.p-intro__logo { justify-self: end; max-width: var(--size-mark); }
+/* słowa tytułu wjeżdżają po kolei, na zmianę z prawej i z lewej */
+.p-intro__word { display: inline-block; white-space: pre; animation: p-intro-word 520ms var(--intro-ease) calc(120ms + var(--i, 0) * var(--intro-step)) backwards; }
+.p-intro__word:nth-child(even) { --from: calc(var(--space-6) * -1); }
+.p-intro__lead { animation: p-intro-fade 480ms ease-out 1200ms backwards; }
+.p-intro__actions { animation: p-intro-fade 480ms ease-out 1400ms backwards; }
+/* znak rysuje się z trzech stron: C od prawej, A od lewego dołu, S od góry (osie w Logo.astro) */
+.p-logo__stroke { stroke-dasharray: var(--len); animation: p-logo-draw var(--draw) cubic-bezier(0.65, 0, 0.35, 1) var(--delay) backwards; }
+.p-logo__stroke--c { --draw: 1000ms; --delay: 200ms; }
+.p-logo__stroke--a { --draw: 900ms; --delay: 350ms; }
+.p-logo__stroke--s { --draw: 800ms; --delay: 650ms; }
+@keyframes p-intro-word { from { opacity: 0; filter: blur(10px); transform: translateX(var(--from, var(--space-6))); } }
+@keyframes p-intro-fade { from { opacity: 0; } }
+@keyframes p-logo-draw { from { stroke-dashoffset: var(--len); } }
 
 /* ---------- obrazy stron ---------- */
 .p-cover { display: block; width: 100%; max-width: var(--measure-cover); height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin-top: var(--space-12); }
@@ -148,9 +173,15 @@ a { color: var(--link); }
 .acs-menu__foot a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 html:has(.acs-menu[open]) { overflow: hidden; }
 
+/* wąskie dwie kolumny: najdłuższe słowo tytułu wychodzi poza swoją kolumnę, więc znak jest mniejszy */
+@media (max-width: 1279px) {
+  .p-intro__logo { max-width: var(--size-mark-md); }
+}
 @media (max-width: 1023px) {
   .p-wrap { padding-left: var(--space-6); padding-right: var(--space-6); }
   .p-hero { grid-template-columns: 1fr; }
+  /* jedna kolumna: mały znak nad tytułem, żeby rysował się na pierwszym ekranie */
+  .p-intro__logo { order: -1; justify-self: start; max-width: var(--size-mark-sm); }
   .p-cols-3, .p-teams { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 639px) {

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/Button.astro';
 import ContactBlock from '../components/ContactBlock.astro';
+import Logo from '../components/Logo.astro';
 import PostCard from '../components/PostCard.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import TournamentHero from '../components/TournamentHero.astro';
@@ -10,6 +11,9 @@ import { NAZWA, aktualnyTurniej, grafikaOg, pobierzTeksty, pobierzUstawienia, po
 const [teksty, ustawienia, turniej, wpisy] = await Promise.all([pobierzTeksty(), pobierzUstawienia(), aktualnyTurniej(), pobierzWpisy()]);
 const najnowsze = wpisy.slice(0, 3);
 const { glowna } = teksty;
+// Słowa tytułu wchodzą po kolei; od piątego razem, żeby długi tytuł nie opóźniał reszty hero.
+// Odstęp jest w środku słowa (white-space: pre), bo między blokami na końcu wiersza Safari go gubi.
+const slowa = glowna.tytul.split(/\s+/).filter(Boolean);
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -23,33 +27,26 @@ const jsonLd = {
 
 <Layout description={ustawienia.opis} image={await grafikaOg(turniej?.baner)} jsonLd={jsonLd}>
   <section class="p-wrap">
-    <div class="p-hero">
+    <div class="p-hero p-intro">
       <div>
         <div class="label p-accent">{glowna.etykieta}</div>
-        <h1 class="display-xl p-title">{glowna.tytul}</h1>
-        {glowna.lead && <p class="lead p-lead p-lead--hero">{glowna.lead}</p>}
-        <div class="p-row p-mt-10">
+        <h1 class="display-xl p-title">
+          {slowa.map((slowo, i) => <span class="p-intro__word" style={`--i:${Math.min(i, 4)}`}>{i < slowa.length - 1 ? `${slowo} ` : slowo}</span>)}
+        </h1>
+        {glowna.lead && <p class="lead p-lead p-lead--hero p-intro__lead">{glowna.lead}</p>}
+        <div class="p-row p-mt-10 p-intro__actions">
           <Button href="#aktualnosci" variant="accent" icon="↓">Aktualności</Button>
           <Button href="/o-nas" variant="secondary">O nas</Button>
         </div>
       </div>
-      {
-        turniej && (
-          <div>
-            <TournamentHero size="compact" title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} date={turniej.data} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} priority />
-            <div class="p-mt-4">
-              <Button href="#turniej" icon="↓">Zobacz turniej</Button>
-            </div>
-          </div>
-        )
-      }
+      <Logo draw label={`Logo ${NAZWA}`} class="p-intro__logo" />
     </div>
   </section>
 
   <section class="p-wrap p-anchor" id="turniej">
     {
       turniej ? (
-        <TournamentHero title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} format={turniej.format} date={turniej.data} teams={turniej.liczbaDruzynBaner} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} />
+        <TournamentHero title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} format={turniej.format} date={turniej.data} teams={turniej.liczbaDruzynBaner} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} priority />
       ) : (
         <div class="p-empty">
           <p class="lead">Brak nadchodzących turniejów. Nowe ogłaszamy w Aktualnościach.</p>

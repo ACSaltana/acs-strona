@@ -1,0 +1,53 @@
+---
+interface Props {
+  /** Znak rysuje się po wejściu na stronę (hero strony głównej). Najwyżej jeden taki na stronie. */
+  draw?: boolean;
+  /** Nazwa dla czytników ekranu; bez niej znak jest ozdobą */
+  label?: string;
+  class?: string;
+}
+
+const { draw = false, label, class: className } = Astro.props;
+
+// Litery znaku prześledzone z pliku logo (biały znak na przezroczystym tle), w układzie 1392×1490.
+const SZER = 1392;
+const WYS = 1490;
+const litery = {
+  c: 'M571 100c-75 15-131 34-190 65c-157 84-271 213-333 380c-55 145-56 315-3 462c15 40 56 126 61 126c0 0 3-4 5-8c2-5 22-45 43-90c22-46 40-84 41-86c0-2-2-9-5-22c-9-32-14-58-17-83c-24-199 66-399 231-509c34-23 90-51 115-58c5-1 5-1 25-42c10-21 26-56 37-77c19-40 30-63 30-64c0-2-11 0-40 6zM1215 930c-1 0-2 8-4 17c-15 64-39 116-76 163c-94 116-232 195-374 210c-47 6-89 4-145-5c-97-16-181-55-260-122c-6-5-12-9-13-9c-1 0-8 14-24 49c-34 72-44 95-43 96c1 3 41 30 67 46c30 19 83 47 113 60c148 62 329 65 482 8c199-74 353-229 426-427c8-20 16-48 17-55c1-2 2-9 3-15c1-5 2-12 2-14l0-3l-85 0c-47 0-86 0-86 1zM793 92c0 1 6 14 22 47c8 15 21 42 28 57c21 44 39 78 40 80c1 0 6 2 12 4c25 8 73 31 106 53c94 62 159 144 205 262c3 8 7 16 8 17c1 2 6 2 84 2l83 0l0-2c0-5-19-64-28-86c-81-204-253-357-464-415c-47-13-96-22-96-19z',
+  a: 'M701 8c-2 2-60 121-173 352c-30 60-41 85-44 94c-10 30-12 60-6 88c4 22 27 51 55 67c11 7 29 15 31 15c0-1 5-9 10-19c5-10 21-44 36-74c15-31 38-79 51-106c33-67 32-66 37-69c4-2 10 0 13 4c1 2 10 19 20 40c10 20 30 61 44 90c14 29 31 64 37 76c22 44 47 96 51 103c5 9 4 8 23 13c68 18 136 55 188 103c14 12 16 14 14 10c-1-3-32-68-59-124c-36-74-45-93-51-105c-4-6-12-24-20-40c-8-16-24-49-37-74c-48-100-142-290-194-397c-26-53-24-50-26-47zM329 772c-1 0-3 5-6 11c-3 5-18 38-35 72c-17 34-37 76-44 92c-8 16-22 44-30 62c-9 17-27 54-40 83c-14 28-32 66-41 85c-20 41-21 43-37 77c-13 26-57 117-76 156c-5 12-10 22-10 23c0 1 143-69 197-97l22-11l14-30c8-17 54-112 102-212c48-100 92-193 99-207c7-14 12-25 11-26c0-1-5-4-10-6c-39-17-73-38-105-65c-9-8-10-9-11-7z',
+  s: 'M470 345c-65 32-121 86-145 141c-30 68-25 155 13 215c52 85 165 131 358 145c136 11 217 50 254 127c21 43 25 89 12 143c-13 52-46 98-95 131c-13 9-13 9 2 4c103-35 171-91 214-178c31-63 35-118 12-175c-14-35-49-73-98-107c-77-55-157-80-288-91c-94-8-148-20-192-40c-60-30-90-79-90-148c0-44 8-71 45-145c8-15 14-27 14-27c0-2-3 0-16 5z',
+};
+
+// Rysowanie: każdą literę zasłania maska, w której gruba kreska jedzie po osi litery i ją odsłania.
+// `length` to długość osi z małym zapasem, `width` to grubość kreski szersza od litery.
+const osie = {
+  // C: dwa łuki od końcówek po prawej, spotykają się po lewej
+  c: [
+    { d: 'M1312 665A617.5 617.5 0 0 0 89 815', length: 1858, width: 196 },
+    { d: 'M1315 880A617.5 617.5 0 0 1 89 751', length: 1880, width: 196 },
+  ],
+  // A: od stopy w lewym dolnym rogu do wierzchołka i w dół prawej nogi
+  a: [{ d: 'M60 1501L702 178 1048 884', length: 2261, width: 176 }],
+  // S: od górnego czubka do ogona
+  s: [{ d: 'M529 284C522 293 508 311 486 339C464 367 415 409 398 450C381 491 374 546 385 587C396 627 430 664 465 690C499 717 548 732 593 747C639 763 690 770 737 784C784 797 833 808 875 829C917 849 963 874 987 909C1012 943 1025 994 1022 1037C1020 1080 999 1130 971 1166C944 1203 886 1232 858 1254C830 1276 811 1289 802 1297', length: 1556, width: 236 }],
+};
+const klucze = ['c', 'a', 's'] as const;
+---
+
+<svg class:list={['p-logo', className]} viewBox={`0 0 ${SZER} ${WYS}`} width={SZER} height={WYS} fill="currentColor" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'}>
+  {
+    draw && (
+      <defs>
+        {klucze.map((k) => (
+          <mask id={`p-logo-${k}`} maskUnits="userSpaceOnUse" x="0" y="0" width={SZER} height={WYS}>
+            {/* biel w masce znaczy „widoczne”: to nie jest kolor strony */}
+            {osie[k].map((o) => (
+              <path class:list={['p-logo__stroke', `p-logo__stroke--${k}`]} d={o.d} fill="none" stroke="#fff" stroke-width={o.width} style={`--len:${o.length}`} />
+            ))}
+          </mask>
+        ))}
+      </defs>
+    )
+  }
+  {klucze.map((k) => <path d={litery[k]} mask={draw ? `url(#p-logo-${k})` : undefined} />)}
+</svg>
