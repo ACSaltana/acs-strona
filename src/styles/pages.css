@@ -180,8 +180,8 @@ html:has(.acs-menu[open]) { overflow: hidden; }
 @media (max-width: 1023px) {
   .p-wrap { padding-left: var(--space-6); padding-right: var(--space-6); }
   .p-hero { grid-template-columns: 1fr; }
-  /* jedna kolumna: mały znak nad tytułem, żeby rysował się na pierwszym ekranie */
-  .p-intro__logo { order: -1; justify-self: start; max-width: var(--size-mark-sm); }
+  /* jedna kolumna: mały znak nad tytułem, żeby rysował się na pierwszym ekranie; po prawej, bo po lewej tuż nad nim jest znak w nagłówku */
+  .p-intro__logo { order: -1; justify-self: end; max-width: var(--size-mark-sm); }
   .p-cols-3, .p-teams { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 639px) {
@@ -204,6 +204,9 @@ html:has(.acs-menu[open]) { overflow: hidden; }
 /* ---------- dopasowania komponentów ---------- */
 /* logo sponsora ma atrybuty width i height (brak przeskoku układu), a skaluje się z zachowaniem proporcji */
 .acs-sponsor__logo img { width: auto; height: auto; }
+/* znak ACS w nagłówku zamiast liter „ACS”: wysokość jak dla pliku logo w bundle.css, nazwa wyśrodkowana w pionie */
+.acs-wordmark--mark { align-items: center; }
+.acs-wordmark .p-logo { width: auto; height: var(--space-10); }
 /* <picture> w banerze nie może zmieniać układu: obraz dalej wypełnia całe tło */
 .acs-hero__bg picture { display: contents; }
 /* pudełko drabinki przewija się w poziomie, więc musi mieć widoczny fokus z klawiatury */
