@@ -26,24 +26,27 @@ const jsonLd = {
 ---
 
 <Layout description={ustawienia.opis} image={await grafikaOg(turniej?.baner)} jsonLd={jsonLd}>
-  <section class="p-wrap">
-    <div class="p-hero p-intro">
-      <div>
-        <div class="label p-accent">{glowna.etykieta}</div>
-        <h1 class="display-xl p-title">
-          {slowa.map((slowo, i) => <span class="p-intro__word" style={`--i:${Math.min(i, 4)}`}>{i < slowa.length - 1 ? `${slowo} ` : slowo}</span>)}
-        </h1>
-        {glowna.lead && <p class="lead p-lead p-lead--hero p-intro__lead">{glowna.lead}</p>}
-        <div class="p-row p-mt-10 p-intro__actions">
-          <Button href="#aktualnosci" variant="accent" icon="↓">Aktualności</Button>
-          <Button href="/o-nas" variant="secondary">O nas</Button>
+  <section class="p-stage">
+    <div class="p-wrap">
+      <div class="p-hero p-intro">
+        <div>
+          <div class="label p-accent">{glowna.etykieta}</div>
+          <h1 class="display-xl p-title">
+            {slowa.map((slowo, i) => <span class="p-intro__word" style={`--i:${Math.min(i, 4)}`}>{i < slowa.length - 1 ? `${slowo} ` : slowo}</span>)}
+          </h1>
+          {glowna.lead && <p class="lead p-lead p-lead--hero p-intro__lead">{glowna.lead}</p>}
+          <div class="p-row p-mt-10 p-intro__actions">
+            <Button href="#aktualnosci" variant="accent" icon="↓">Aktualności</Button>
+            <Button href="/o-nas" variant="secondary">O nas</Button>
+          </div>
         </div>
+        <Logo draw label={`Logo ${NAZWA}`} class="p-intro__logo" />
       </div>
-      <Logo draw label={`Logo ${NAZWA}`} class="p-intro__logo" />
     </div>
   </section>
 
-  <section class="p-wrap p-anchor" id="turniej">
+  {/* baner turnieju pojawia się dopiero przy przewijaniu i chowa po powrocie na górę: skrypt na dole pliku */}
+  <section class="p-wrap p-anchor p-reveal" id="turniej" data-reveal>
     {
       turniej ? (
         <TournamentHero title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} format={turniej.format} date={turniej.data} teams={turniej.liczbaDruzynBaner} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} priority />
@@ -78,3 +81,26 @@ const jsonLd = {
     <ContactBlock email={ustawienia.email} eyebrow="02 / Kontakt" topics={glowna.kontaktTematy} />
   </section>
 </Layout>
+
+<script>
+  // Baner turnieju pokazuje się, gdy przy przewijaniu wjeżdża na ekran, i chowa, gdy wraca pod jego dół (powrót na górę strony).
+  // Bez skryptu i przy ograniczonym ruchu jest widoczny cały czas.
+  const baner = document.querySelector<HTMLElement>('[data-reveal]');
+  if (baner && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let czeka = false;
+    const ustaw = () => {
+      czeka = false;
+      // granica to 88% wysokości ekranu: baner musi wyraźnie wjechać, zanim się pokaże
+      baner.dataset.reveal = baner.getBoundingClientRect().top < window.innerHeight * 0.88 ? 'shown' : 'hidden';
+    };
+    const zaplanuj = () => {
+      if (!czeka) {
+        czeka = true;
+        requestAnimationFrame(ustaw);
+      }
+    };
+    ustaw();
+    window.addEventListener('scroll', zaplanuj, { passive: true });
+    window.addEventListener('resize', zaplanuj);
+  }
+</script>

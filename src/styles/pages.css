@@ -18,7 +18,28 @@
   --size-mark-sm: 152px;
   --intro-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --intro-step: 280ms;
+  /* Tło strony, wersja robocza (2026-10-13): szarości zamiast czerni i ukośne pasy.
+     Jasność całości ustawiają dwa kolory bazowe; odcienie pasów to nakładki bieli i czerni na ten kolor. */
+  --page: #2c2c31;
+  --page-hero: #232327;
+  --band-light: color-mix(in srgb, var(--ink) 4%, transparent);
+  --band-dark: color-mix(in srgb, var(--bg) 24%, transparent);
+  --band-line: color-mix(in srgb, var(--ink) 6%, transparent);
+  --band-angle: 113deg;
+  /* tyle drugiej części tła widać na dole pierwszego ekranu */
+  --peek: var(--space-6);
 }
+
+/* Na szarym tle tekst pomocniczy, linie i czerwone etykiety muszą być jaśniejsze niż na czerni,
+   żeby utrzymać kontrast 4.5:1 także na najjaśniejszym pasie. Czerwień przycisków zostaje bez zmian. */
+.p-root {
+  --ink-muted: #b8b8b8;
+  --ink-subtle: #a2a2a2;
+  --line: #3e3e43;
+  --line-strong: #848488;
+  --accent-text: #ff736a;
+}
+.p-accent, .acs-sechead__index { color: var(--accent-text); }
 
 html, body { background: var(--bg); }
 a { color: var(--link); }
@@ -27,7 +48,17 @@ a { color: var(--link); }
 .stat { font-variant-numeric: tabular-nums; }
 
 /* ---------- szkielet ---------- */
-.p-root { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
+.p-root { min-height: 100vh; display: flex; flex-direction: column; color: var(--ink); font-family: var(--font-sans); }
+/* Tło wszystkich podstron. Warstwy od góry: jaśniejsze pasy, ciemniejsze pasy, kolor bazowy z „oknami”,
+   a pod nim kreskowanie widoczne tylko przez te okna. Okresy warstw są różne, więc układ się nie powtarza. */
+.p-root {
+  background-color: var(--page);
+  background-image:
+    repeating-linear-gradient(var(--band-angle), transparent 0 180px, var(--band-light) 181px 430px, transparent 431px 790px, var(--band-light) 791px 850px, transparent 851px 1540px, var(--band-light) 1541px 1680px, transparent 1681px 2300px),
+    repeating-linear-gradient(var(--band-angle), transparent 0 560px, var(--band-dark) 561px 760px, transparent 761px 1270px, var(--band-dark) 1271px 1310px, transparent 1311px 1870px),
+    repeating-linear-gradient(var(--band-angle), var(--page) 0 930px, transparent 931px 1080px, var(--page) 1081px 2090px, transparent 2091px 2150px, var(--page) 2151px 2630px),
+    repeating-linear-gradient(var(--band-angle), var(--band-line) 0 1px, transparent 1px 9px);
+}
 .p-main { flex: 1 0 auto; padding-bottom: var(--space-24); }
 .p-wrap { box-sizing: border-box; width: 100%; max-width: calc(var(--container-max) + var(--space-12) * 2); margin: 0 auto; padding-left: var(--space-12); padding-right: var(--space-12); }
 .p-section { margin-top: var(--space-24); }
@@ -81,6 +112,29 @@ a { color: var(--link); }
 .p-lead--history + .p-lead--history { margin-top: var(--space-4); }
 .p-lead--tight { margin-top: var(--space-2); max-width: none; }
 .p-post-head { max-width: var(--measure-heading); }
+
+/* ---------- pierwszy ekran strony głównej ---------- */
+/* Pierwsza część tła zajmuje cały ekran poza paskiem --peek na dole, w którym zaczyna się druga część.
+   Układ pasów jest inny niż na reszcie strony, a w „oknach” zamiast kreskowania są małe celowniki i iksy. */
+.p-stage {
+  display: grid; align-items: center;
+  min-height: calc(100vh - var(--header-height) - var(--peek));
+  min-height: calc(100svh - var(--header-height) - var(--peek));
+  border-bottom: 1px solid var(--line);
+  background-color: var(--page-hero);
+  background-image:
+    repeating-linear-gradient(var(--band-angle), transparent 0 90px, var(--band-light) 91px 150px, transparent 151px 640px, var(--band-light) 641px 960px, transparent 961px 1420px, var(--band-light) 1421px 1450px, transparent 1451px 2100px),
+    repeating-linear-gradient(var(--band-angle), transparent 0 300px, var(--band-dark) 301px 470px, transparent 471px 1150px, var(--band-dark) 1151px 1230px, transparent 1231px 1730px),
+    repeating-linear-gradient(var(--band-angle), var(--page-hero) 0 1010px, transparent 1011px 1330px, var(--page-hero) 1331px 1900px, transparent 1901px 2010px, var(--page-hero) 2011px 2470px),
+    /* znaczki są białe z małą przezroczystością: to nakładka jak pasy, a nie kolor strony */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112'%3E%3Cpath d='M23 28h10M28 23v10M80 80l8 8M88 80l-8 8' fill='none' stroke='%23fff' stroke-opacity='.13'/%3E%3C/svg%3E");
+}
+.p-stage > .p-wrap { min-width: 0; }
+.p-stage .p-hero { padding: clamp(var(--space-8), 8vh, var(--space-24)) 0; }
+.p-stage + * { margin-top: var(--space-16); }
+/* baner turnieju pod hero pojawia się przy przewijaniu w dół i znika po powrocie na górę (skrypt w index.astro) */
+.p-reveal { transition: opacity 600ms ease-out, transform 600ms var(--intro-ease); }
+.p-reveal[data-reveal="hidden"] { opacity: 0; transform: translateY(var(--space-12)); }
 
 /* ---------- hero strony głównej: znak ACS i wejście po załadowaniu ---------- */
 /* Stan końcowy jest stanem bazowym, a animacje opisują tylko początek. Bez animacji
@@ -190,6 +244,10 @@ html:has(.acs-menu[open]) { overflow: hidden; }
   .p-section { margin-top: var(--space-16); }
   .p-head { padding-top: var(--space-12); }
   .p-hero { padding: var(--space-12) 0 var(--space-16); gap: var(--space-8); }
+  /* nagłówek ma tu 64px, a hero mniejsze marginesy, żeby zmieścić się na ekranie telefonu */
+  .p-stage { min-height: calc(100vh - var(--space-16) - var(--peek)); min-height: calc(100svh - var(--space-16) - var(--peek)); }
+  .p-stage .p-hero { padding: var(--space-8) 0; gap: var(--space-6); }
+  .p-stage + * { margin-top: var(--space-12); }
   .p-cols-3, .p-teams { grid-template-columns: 1fr; }
   /* mniejsze style Display na telefonie (brandbook, sekcja Typografia) */
   .display-xl { font-size: 56px; line-height: 52px; }
