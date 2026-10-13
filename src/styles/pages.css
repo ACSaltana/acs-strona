@@ -18,15 +18,24 @@
   --size-mark-sm: 152px;
   --intro-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --intro-step: 280ms;
-  /* Tło strony, wersja robocza (2026-10-13): szarości zamiast czerni i ukośne pasy.
-     Jasność całości ustawiają dwa kolory bazowe; odcienie pasów to nakładki bieli i czerni na ten kolor. */
-  --page: #2c2c31;
-  --page-hero: #232327;
+  /* Tło strony, wersja robocza (2026-10-13): szarości zamiast czerni, każda sekcja ma własny odcień.
+     Odcienie pasów to nakładki bieli i czerni na kolor sekcji, więc jasność ustawia się samym odcieniem. */
+  --shade-hero: #232327;
+  --shade-light: #34343a;
+  --shade-dark: #1b1b1e;
+  --shade-mid: #2c2c31;
+  --shade-page: #2c2c31;
   --band-light: color-mix(in srgb, var(--ink) 4%, transparent);
   --band-dark: color-mix(in srgb, var(--bg) 24%, transparent);
   --band-line: color-mix(in srgb, var(--ink) 6%, transparent);
-  --band-angle: 113deg;
-  /* tyle drugiej części tła widać na dole pierwszego ekranu */
+  --band-dot: color-mix(in srgb, var(--ink) 15%, transparent);
+  /* Pasy są pochylone w stosunku 3:7. Dzięki temu znaczki ułożone w kratkę mogą płynąć dokładnie wzdłuż pasów
+     i po przesunięciu o 3 kratki w bok i 7 w pionie wzór trafia sam na siebie. */
+  --lean-right: 113.2deg;
+  --lean-left: 66.8deg;
+  /* celownik i iks: białe z małą przezroczystością, czyli nakładka jak pasy, a nie kolor strony */
+  --marks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 112 112'%3E%3Cpath d='M23 28h10M28 23v10M80 80l8 8M88 80l-8 8' fill='none' stroke='%23fff' stroke-opacity='.14'/%3E%3C/svg%3E");
+  /* tyle następnej sekcji widać na dole pierwszego ekranu */
   --peek: var(--space-6);
 }
 
@@ -48,17 +57,7 @@ a { color: var(--link); }
 .stat { font-variant-numeric: tabular-nums; }
 
 /* ---------- szkielet ---------- */
-.p-root { min-height: 100vh; display: flex; flex-direction: column; color: var(--ink); font-family: var(--font-sans); }
-/* Tło wszystkich podstron. Warstwy od góry: jaśniejsze pasy, ciemniejsze pasy, kolor bazowy z „oknami”,
-   a pod nim kreskowanie widoczne tylko przez te okna. Okresy warstw są różne, więc układ się nie powtarza. */
-.p-root {
-  background-color: var(--page);
-  background-image:
-    repeating-linear-gradient(var(--band-angle), transparent 0 180px, var(--band-light) 181px 430px, transparent 431px 790px, var(--band-light) 791px 850px, transparent 851px 1540px, var(--band-light) 1541px 1680px, transparent 1681px 2300px),
-    repeating-linear-gradient(var(--band-angle), transparent 0 560px, var(--band-dark) 561px 760px, transparent 761px 1270px, var(--band-dark) 1271px 1310px, transparent 1311px 1870px),
-    repeating-linear-gradient(var(--band-angle), var(--page) 0 930px, transparent 931px 1080px, var(--page) 1081px 2090px, transparent 2091px 2150px, var(--page) 2151px 2630px),
-    repeating-linear-gradient(var(--band-angle), var(--band-line) 0 1px, transparent 1px 9px);
-}
+.p-root { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
 .p-main { flex: 1 0 auto; padding-bottom: var(--space-24); }
 .p-wrap { box-sizing: border-box; width: 100%; max-width: calc(var(--container-max) + var(--space-12) * 2); margin: 0 auto; padding-left: var(--space-12); padding-right: var(--space-12); }
 .p-section { margin-top: var(--space-24); }
@@ -113,25 +112,77 @@ a { color: var(--link); }
 .p-lead--tight { margin-top: var(--space-2); max-width: none; }
 .p-post-head { max-width: var(--measure-heading); }
 
+/* ---------- tło przyklejone do ekranu (wersja robocza) ---------- */
+/* Sekcja p-band przycina tło do swojego obszaru, a samo tło (p-backdrop) stoi w miejscu względem ekranu,
+   więc treść przesuwa się po nim, a na granicy sekcji jedno tło odsłania drugie. Wzór: counter-strike.net/cs2.
+   Każdy wariant ma własny odcień, układ i pochylenie pasów. Dwie warstwy: __detail (kreskowanie, znaczki albo
+   kropki widoczne tylko w „oknach” wyciętych w kolorze sekcji) i nad nią __bands (szerokie pasy). */
+.p-band { position: relative; isolation: isolate; clip-path: inset(0); }
+/* podwójna klasa, żeby wygrać z odstępem .p-main ustawianym niżej dla telefonu */
+.p-main.p-main--bands { padding-bottom: 0; }
+.p-main--bands > .p-band { padding: var(--space-24) 0; }
+.p-backdrop { position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100vh; height: 100lvh; overflow: hidden; pointer-events: none; background-color: var(--shade); }
+.p-backdrop > * { position: absolute; inset: 0; }
+/* pasy lekko kołyszą się na boki, a warstwa pod nimi płynie jednostajnie; zapas poza ekranem równa się przesunięciu */
+.p-backdrop__bands { inset: 0 calc(var(--sway) * -1); animation: p-sway var(--sway-time) ease-in-out infinite alternate; }
+.p-backdrop__detail { animation: p-drift var(--drift-time) linear infinite; }
+@keyframes p-sway { from { transform: translateX(calc(var(--sway) * -1)); } to { transform: translateX(var(--sway)); } }
+@keyframes p-drift { to { transform: translate(var(--dx), var(--dy)); } }
+
+/* hero: szerokie pasy, w oknach celowniki i iksy płynące w górę wzdłuż pasów */
+.p-backdrop--hero { --shade: var(--shade-hero); --sway: 28px; --sway-time: 18s; --dx: 336px; --dy: -784px; --drift-time: 120s; }
+.p-backdrop--hero .p-backdrop__bands { background-image:
+  repeating-linear-gradient(var(--lean-right), transparent 0 90px, var(--band-light) 91px 150px, transparent 151px 640px, var(--band-light) 641px 960px, transparent 961px 1420px, var(--band-light) 1421px 1450px, transparent 1451px 2100px),
+  repeating-linear-gradient(var(--lean-right), transparent 0 300px, var(--band-dark) 301px 470px, transparent 471px 1150px, var(--band-dark) 1151px 1230px, transparent 1231px 1730px); }
+.p-backdrop--hero .p-backdrop__detail { inset: 0 0 -784px -336px; background-image:
+  repeating-linear-gradient(var(--lean-right), var(--shade) 0 1010px, transparent 1011px 1330px, var(--shade) 1331px 1900px, transparent 1901px 2010px, var(--shade) 2011px 2470px),
+  var(--marks); background-size: auto, 112px 112px; }
+
+/* turniej: najjaśniejsza sekcja, grupy cienkich kresek przesuwają się w lewo */
+.p-backdrop--light { --shade: var(--shade-light); --sway: 22px; --sway-time: 14s; --dx: -705px; --dy: 0px; --drift-time: 80s; }
+.p-backdrop--light .p-backdrop__bands { animation-direction: alternate-reverse; background-image:
+  repeating-linear-gradient(var(--lean-right), transparent 0 140px, var(--band-light) 141px 520px, transparent 521px 1100px, var(--band-light) 1101px 1180px, transparent 1181px 1900px),
+  repeating-linear-gradient(var(--lean-right), transparent 0 700px, var(--band-dark) 701px 940px, transparent 941px 1380px, var(--band-dark) 1381px 1420px, transparent 1421px 1500px); }
+.p-backdrop--light .p-backdrop__detail { inset: 0 -705px 0 0; background-image:
+  repeating-linear-gradient(var(--lean-right), var(--shade) 0 250px, transparent 251px 340px, var(--shade) 341px 560px, transparent 561px 596px, var(--shade) 597px 648px),
+  repeating-linear-gradient(var(--lean-right), var(--band-line) 0 1px, transparent 1px 9px); }
+
+/* aktualności: najciemniejsza sekcja, wąskie pasy pochylone w drugą stronę, w oknach siatka kropek płynąca w dół */
+.p-backdrop--dark { --shade: var(--shade-dark); --sway: 34px; --sway-time: 22s; --dx: 84px; --dy: 196px; --drift-time: 36s; }
+.p-backdrop--dark .p-backdrop__bands { background-image:
+  repeating-linear-gradient(var(--lean-left), transparent 0 60px, var(--band-light) 61px 110px, transparent 111px 420px, var(--band-light) 421px 640px, transparent 641px 700px, var(--band-light) 701px 716px, transparent 717px 980px),
+  repeating-linear-gradient(var(--lean-left), transparent 0 200px, var(--band-dark) 201px 330px, transparent 331px 600px, var(--band-dark) 601px 630px, transparent 631px 760px); }
+.p-backdrop--dark .p-backdrop__detail { inset: -196px 0 0 -84px; background-image:
+  repeating-linear-gradient(var(--lean-left), var(--shade) 0 200px, transparent 201px 520px, var(--shade) 521px 900px, transparent 901px 960px, var(--shade) 961px 1500px),
+  radial-gradient(circle, var(--band-dot) 1.2px, transparent 1.8px); background-size: auto, 28px 28px; }
+
+/* kontakt: bardzo szerokie pasy, większe celowniki płynące w dół */
+.p-backdrop--mid { --shade: var(--shade-mid); --sway: 40px; --sway-time: 26s; --dx: -288px; --dy: 672px; --drift-time: 100s; }
+.p-backdrop--mid .p-backdrop__bands { animation-direction: alternate-reverse; background-image:
+  repeating-linear-gradient(var(--lean-right), transparent 0 400px, var(--band-light) 401px 1100px, transparent 1101px 2300px, var(--band-light) 2301px 2380px, transparent 2381px 3100px),
+  repeating-linear-gradient(var(--lean-right), transparent 0 1300px, var(--band-dark) 1301px 1700px, transparent 1701px 2500px); }
+.p-backdrop--mid .p-backdrop__detail { inset: -672px -288px 0 0; background-image:
+  repeating-linear-gradient(var(--lean-right), var(--shade) 0 500px, transparent 501px 900px, var(--shade) 901px 1700px),
+  var(--marks); background-size: auto, 96px 96px; }
+
+/* podstrony: jedno tło na całą treść, grupy kresek przesuwają się w prawo */
+.p-backdrop--page { --shade: var(--shade-page); --sway: 26px; --sway-time: 20s; --dx: 705px; --dy: 0px; --drift-time: 90s; }
+.p-backdrop--page .p-backdrop__bands { background-image:
+  repeating-linear-gradient(var(--lean-right), transparent 0 180px, var(--band-light) 181px 430px, transparent 431px 790px, var(--band-light) 791px 850px, transparent 851px 1540px, var(--band-light) 1541px 1680px, transparent 1681px 2300px),
+  repeating-linear-gradient(var(--lean-right), transparent 0 560px, var(--band-dark) 561px 760px, transparent 761px 1270px, var(--band-dark) 1271px 1310px, transparent 1311px 1870px); }
+.p-backdrop--page .p-backdrop__detail { inset: 0 0 0 -705px; background-image:
+  repeating-linear-gradient(var(--lean-right), var(--shade) 0 120px, transparent 121px 180px, var(--shade) 181px 470px, transparent 471px 600px, var(--shade) 601px 648px),
+  repeating-linear-gradient(var(--lean-right), var(--band-line) 0 1px, transparent 1px 9px); }
+
 /* ---------- pierwszy ekran strony głównej ---------- */
-/* Pierwsza część tła zajmuje cały ekran poza paskiem --peek na dole, w którym zaczyna się druga część.
-   Układ pasów jest inny niż na reszcie strony, a w „oknach” zamiast kreskowania są małe celowniki i iksy. */
-.p-stage {
-  display: grid; align-items: center;
+/* Hero zajmuje cały ekran poza paskiem --peek na dole, w którym widać już tło następnej sekcji. */
+.p-main--bands > .p-stage {
+  display: grid; align-items: center; padding: 0;
   min-height: calc(100vh - var(--header-height) - var(--peek));
   min-height: calc(100svh - var(--header-height) - var(--peek));
-  border-bottom: 1px solid var(--line);
-  background-color: var(--page-hero);
-  background-image:
-    repeating-linear-gradient(var(--band-angle), transparent 0 90px, var(--band-light) 91px 150px, transparent 151px 640px, var(--band-light) 641px 960px, transparent 961px 1420px, var(--band-light) 1421px 1450px, transparent 1451px 2100px),
-    repeating-linear-gradient(var(--band-angle), transparent 0 300px, var(--band-dark) 301px 470px, transparent 471px 1150px, var(--band-dark) 1151px 1230px, transparent 1231px 1730px),
-    repeating-linear-gradient(var(--band-angle), var(--page-hero) 0 1010px, transparent 1011px 1330px, var(--page-hero) 1331px 1900px, transparent 1901px 2010px, var(--page-hero) 2011px 2470px),
-    /* znaczki są białe z małą przezroczystością: to nakładka jak pasy, a nie kolor strony */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112'%3E%3Cpath d='M23 28h10M28 23v10M80 80l8 8M88 80l-8 8' fill='none' stroke='%23fff' stroke-opacity='.13'/%3E%3C/svg%3E");
 }
 .p-stage > .p-wrap { min-width: 0; }
 .p-stage .p-hero { padding: clamp(var(--space-8), 8vh, var(--space-24)) 0; }
-.p-stage + * { margin-top: var(--space-16); }
 /* baner turnieju pod hero pojawia się przy przewijaniu w dół i znika po powrocie na górę (skrypt w index.astro) */
 .p-reveal { transition: opacity 600ms ease-out, transform 600ms var(--intro-ease); }
 .p-reveal[data-reveal="hidden"] { opacity: 0; transform: translateY(var(--space-12)); }
@@ -244,10 +295,10 @@ html:has(.acs-menu[open]) { overflow: hidden; }
   .p-section { margin-top: var(--space-16); }
   .p-head { padding-top: var(--space-12); }
   .p-hero { padding: var(--space-12) 0 var(--space-16); gap: var(--space-8); }
+  .p-main--bands > .p-band { padding: var(--space-16) 0; }
   /* nagłówek ma tu 64px, a hero mniejsze marginesy, żeby zmieścić się na ekranie telefonu */
-  .p-stage { min-height: calc(100vh - var(--space-16) - var(--peek)); min-height: calc(100svh - var(--space-16) - var(--peek)); }
+  .p-main--bands > .p-stage { padding: 0; min-height: calc(100vh - var(--space-16) - var(--peek)); min-height: calc(100svh - var(--space-16) - var(--peek)); }
   .p-stage .p-hero { padding: var(--space-8) 0; gap: var(--space-6); }
-  .p-stage + * { margin-top: var(--space-12); }
   .p-cols-3, .p-teams { grid-template-columns: 1fr; }
   /* mniejsze style Display na telefonie (brandbook, sekcja Typografia) */
   .display-xl { font-size: 56px; line-height: 52px; }

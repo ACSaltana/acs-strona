@@ -5,6 +5,7 @@ import '../styles/bundle.css';
 import '../styles/pages.css';
 import displayFont from '@fontsource/saira-condensed/files/saira-condensed-latin-700-normal.woff2?url';
 import sansFont from '@fontsource/saira/files/saira-latin-400-normal.woff2?url';
+import Backdrop from '../components/Backdrop.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { NAV, NAZWA, SKROT, aktualnyTurniej, pobierzUstawienia } from '../lib/tresc';
@@ -18,9 +19,11 @@ interface Props {
   type?: 'website' | 'article';
   /** Dane strukturalne schema.org */
   jsonLd?: Record<string, unknown>;
+  /** Strona sama układa sekcje p-band z własnym tłem (strona główna); bez tego całe main ma jedno tło */
+  bands?: boolean;
 }
 
-const { title, description, image, type = 'website', jsonLd } = Astro.props;
+const { title, description, image, type = 'website', jsonLd, bands = false } = Astro.props;
 const pageTitle = title ? `${title} — ${SKROT}` : `${SKROT} — ${NAZWA}. Turnieje Counter-Strike 2`;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const canonical = new URL(path, Astro.site);
@@ -60,7 +63,8 @@ const stopka = turniej ? [...NAV, { label: 'Regulamin', href: `${turniej.href}#r
     <div class="p-root">
       <a class="acs-btn acs-btn--primary acs-btn--sm p-skip" href="#tresc">Przejdź do treści</a>
       <SiteHeader items={NAV} current={current} logo={ustawienia.logo} email={ustawienia.email} />
-      <main class="p-main" id="tresc">
+      <main class:list={['p-main', bands ? 'p-main--bands' : 'p-band']} id="tresc">
+        {!bands && <Backdrop />}
         <slot />
       </main>
       <SiteFooter links={stopka} socials={ustawienia.socials} />

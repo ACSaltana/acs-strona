@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Backdrop from '../components/Backdrop.astro';
 import Button from '../components/Button.astro';
 import ContactBlock from '../components/ContactBlock.astro';
 import Logo from '../components/Logo.astro';
@@ -25,8 +26,9 @@ const jsonLd = {
 };
 ---
 
-<Layout description={ustawienia.opis} image={await grafikaOg(turniej?.baner)} jsonLd={jsonLd}>
-  <section class="p-stage">
+<Layout description={ustawienia.opis} image={await grafikaOg(turniej?.baner)} jsonLd={jsonLd} bands>
+  <section class="p-band p-stage">
+    <Backdrop variant="hero" />
     <div class="p-wrap">
       <div class="p-hero p-intro">
         <div>
@@ -45,40 +47,49 @@ const jsonLd = {
     </div>
   </section>
 
-  {/* baner turnieju pojawia się dopiero przy przewijaniu i chowa po powrocie na górę: skrypt na dole pliku */}
-  <section class="p-wrap p-anchor p-reveal" id="turniej" data-reveal>
-    {
-      turniej ? (
-        <TournamentHero title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} format={turniej.format} date={turniej.data} teams={turniej.liczbaDruzynBaner} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} priority />
-      ) : (
-        <div class="p-empty">
-          <p class="lead">Brak nadchodzących turniejów. Nowe ogłaszamy w Aktualnościach.</p>
-        </div>
-      )
-    }
+  <section class="p-band">
+    <Backdrop variant="light" />
+    {/* baner turnieju pojawia się dopiero przy przewijaniu i chowa po powrocie na górę: skrypt na dole pliku */}
+    <div class="p-wrap p-anchor p-reveal" id="turniej" data-reveal>
+      {
+        turniej ? (
+          <TournamentHero title={turniej.edycja} status={turniej.status} game={turniej.gra} kicker={turniej.kicker} prizePool={turniej.pula} format={turniej.format} date={turniej.data} teams={turniej.liczbaDruzynBaner} image={turniej.baner} imageAlt={turniej.opisGrafiki} href={turniej.href} priority />
+        ) : (
+          <div class="p-empty">
+            <p class="lead">Brak nadchodzących turniejów. Nowe ogłaszamy w Aktualnościach.</p>
+          </div>
+        )
+      }
+    </div>
   </section>
 
-  <section class="p-wrap p-section p-anchor" id="aktualnosci">
-    <SectionHeader index="01" eyebrow="Aktualności" title="Aktualności" href="/aktualnosci">
-      <Button href="/aktualnosci" variant="ghost" icon="→">Wszystkie wpisy</Button>
-    </SectionHeader>
-    {
-      najnowsze.length > 0 ? (
-        <div class="p-cols-3 p-mt-8">
-          {najnowsze.map((w) => (
-            <PostCard title={w.tytul} date={w.dataTekst} dateTime={w.data} category={w.kategoria.nazwa} excerpt={w.zajawka} image={w.okladka} imageAlt={w.opisOkladki} href={w.href} />
-          ))}
-        </div>
-      ) : (
-        <div class="p-empty p-mt-8">
-          <p class="lead">Nie ma jeszcze wpisów.</p>
-        </div>
-      )
-    }
+  <section class="p-band">
+    <Backdrop variant="dark" />
+    <div class="p-wrap p-anchor" id="aktualnosci">
+      <SectionHeader index="01" eyebrow="Aktualności" title="Aktualności" href="/aktualnosci">
+        <Button href="/aktualnosci" variant="ghost" icon="→">Wszystkie wpisy</Button>
+      </SectionHeader>
+      {
+        najnowsze.length > 0 ? (
+          <div class="p-cols-3 p-mt-8">
+            {najnowsze.map((w) => (
+              <PostCard title={w.tytul} date={w.dataTekst} dateTime={w.data} category={w.kategoria.nazwa} excerpt={w.zajawka} image={w.okladka} imageAlt={w.opisOkladki} href={w.href} />
+            ))}
+          </div>
+        ) : (
+          <div class="p-empty p-mt-8">
+            <p class="lead">Nie ma jeszcze wpisów.</p>
+          </div>
+        )
+      }
+    </div>
   </section>
 
-  <section class="p-wrap p-section">
-    <ContactBlock email={ustawienia.email} eyebrow="02 / Kontakt" topics={glowna.kontaktTematy} />
+  <section class="p-band">
+    <Backdrop variant="mid" />
+    <div class="p-wrap">
+      <ContactBlock email={ustawienia.email} eyebrow="02 / Kontakt" topics={glowna.kontaktTematy} />
+    </div>
   </section>
 </Layout>
 

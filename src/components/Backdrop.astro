@@ -1,0 +1,14 @@
+---
+interface Props {
+  /** Odcień i układ pasów: hero, light, dark, mid to sekcje strony głównej, page to tło podstron */
+  variant?: 'hero' | 'light' | 'dark' | 'mid' | 'page';
+}
+
+const { variant = 'page' } = Astro.props;
+---
+
+{/* Tło sekcji przyklejone do ekranu. Rodzic musi mieć klasę p-band, która przycina je do swojego obszaru. */}
+<div class:list={['p-backdrop', `p-backdrop--${variant}`]} aria-hidden="true">
+  <span class="p-backdrop__detail"></span>
+  <span class="p-backdrop__bands"></span>
+</div>
